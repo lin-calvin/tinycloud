@@ -2,6 +2,6 @@ auth:
   type: "auth_pam"
 
 storages:
-  - type: fs_local
+  - type: fs.fs_local
     name: local
     path: "./"

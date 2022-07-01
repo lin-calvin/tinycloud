@@ -26,3 +26,11 @@ class log():
         print("#"*(len(txt)+2))
         print("#"+txt+"#")
         print("#"*(len(txt)+2))
+
+def clean_path(str):
+    output=[]
+    for i in range(len(str)):
+        if str[i]=="/" and i!=len(str) and str[i+1]=="/":
+            continue
+        output.append(str[i])
+    return "".join(output)

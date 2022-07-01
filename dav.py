@@ -2,12 +2,16 @@ from flask import render_template,request,make_response,Response
 import errno
 import base64
 import json
+import utils
 class dav():
     def __init__(self,fs,auth=False):
         self.auth=auth
         self.fs=fs
-    def request(self,subpath=""):
-        print(subpath)
+    def request(self,path=""):
+        if len(path)>1 and path[-1]=="/":
+            path=path[:-1]
+        print(path)
+        #path=utils.clean_path(path)
         if self.auth:
             if  request.headers.get("Authorization"):
                 pw=request.headers["Authorization"]
@@ -19,7 +23,7 @@ class dav():
                 resp.headers["WWW-Authenticate"]=r'Basic realm="Secure Area"'
                 return resp,401
         if request.method=="PROPFIND": #返回目录下的文件
-            ret=self.fs.list(subpath)
+            ret=self.fs.list(path)
             if type(ret)==int:
                 if ret==-1:
                     return "",404
@@ -32,18 +36,18 @@ class dav():
             resp.headers["DAV"]="1,2"
             return resp
         if request.method=="GET":
-            resp=self.fs.read(subpath)
-            if subpath=="":
+            resp=self.fs.read(path)
+            if path=="":
                 return ""
             if resp==-1:
                 return "",404
             return Response(resp)
         if request.method=="PUT":
-            if type(self.fs.write(subpath,request.stream))==int:
+            if type(self.fs.write(path,request.stream))==int:
                 return '',404
             return ""
         if request.method=="DELETE":
-            self.fs.delete(subpath)
+            self.fs.delete(path)
             return ""
         if request.method=="MKCOL":
-            self.fs.mkdir(subpath)
+            self.fs.mkdir(path)

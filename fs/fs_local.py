@@ -16,7 +16,7 @@ class fs():
                 fname=file
                 fsize=os.path.getsize(path+"/"+file)
                 ftime=utils.time_as_rfc(os.stat(path+"/"+file).st_ctime)
-                res.append({"type":ftype,"name":fname,"path":file,"size":fsize,"time":ftime})
+                res.append({"type":ftype,"name":fname,"path":path+"/"+file,"size":fsize,"time":ftime})
             #ftype="dir"
             #fsize=os.path.getsize(path+"/"+file)
             #res.append({"type":ftype,"name":path,"path":path+"/"})

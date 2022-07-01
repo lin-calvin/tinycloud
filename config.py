@@ -2,5 +2,5 @@ import yaml
 
 def load_conf(path):
     global conf
-    file=open(conf_path)
+    file=open(path)
     conf=yaml.safe_load(file.read())
