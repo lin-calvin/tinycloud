@@ -1,7 +1,0 @@
-auth:
-  type: "auth_pam"
-
-storages:
-  - type: fs.fs_local
-    name: local
-    path: "./"
