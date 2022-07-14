@@ -4,14 +4,17 @@ import base64
 import json
 import utils
 import mimetypes
+import os
 class dav():
-    def __init__(self,fs,auth=False):
+    def __init__(self,fs,auth=None,acl=None):
         self.auth=auth
+        self.acl=acl
         self.fs=fs
     def request(self,path=""):
-        if len(path)>1 and path[-1]=="/":
-            path=path[:-1]
-        print(path)
+        path=os.path.normpath("/"+path)
+
+        if ".." in path:
+            return "",400
         #path=utils.clean_path(path)
         if self.auth:
             if  request.headers.get("Authorization"):
@@ -26,6 +29,10 @@ class dav():
                 resp=make_response("Need auth")
                 resp.headers["WWW-Authenticate"]=r'Basic realm="Secure Area"'
                 return resp,401
+        if self.acl:
+            res=self.acl.check(path,username)
+            if not res:
+                return "",403
         if request.method=="PROPFIND": #返回目录下的文件
             ret=self.fs.list(path)
             if type(ret)==int:

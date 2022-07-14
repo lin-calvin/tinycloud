@@ -71,6 +71,16 @@ class tc_filelist extends s {
       (res) => {
         if (res.ok) {
           res.json().then((res) => (this.files = res.files));
+        } else {
+          location.href="#"+this.url.split("/").slice(0, -2).join("/");
+          switch (res.status) {
+            case 404:
+              alert("文件夹不存在");
+              break;
+            case 403:
+              alert("无权访问");
+              break;
+          }
         }
       }
     );
@@ -101,7 +111,9 @@ class tc_filelist extends s {
       e.preventDefault();
       var filename = e.target.getAttribute("tc-filename");
       this.menu.menu = {
-        打开:()=>{window.open("/dav"+this.url + filename );},
+        打开: () => {
+          window.open("/dav" + this.url + filename);
+        },
         下载文件: () => {
           console.log(e);
           var m = document.createEvent("MouseEvents");

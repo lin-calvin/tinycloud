@@ -23,6 +23,8 @@ class fs():
             for a in self.mount_table:
                 res.append({"type":"dir","name":a,"path":a,"size":4000})
             return res
+        if path.startswith("/"):
+            path=path[1:]
         mount_point=self.get_fs(path)
         if mount_point==-1:
             return -1

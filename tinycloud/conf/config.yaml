@@ -7,4 +7,4 @@ auth:
 storages:
   - type: fs.fs_local
     name: local
-    path: "./test"
+    path: "./"
