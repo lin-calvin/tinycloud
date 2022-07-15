@@ -2,6 +2,7 @@ import os,sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from flask import Flask,redirect,url_for,send_file,request,make_response
+import argparse
 import dav
 import vfs
 import mod_manger
@@ -57,7 +58,14 @@ class tinycloud():
 
 
 if __name__=="__main__":
-    tc=tinycloud("conf/")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c","--config")
+    args = parser.parse_args()
+    if args.config:
+        conf_dir=args.config
+    else:
+        conf_dir="conf"
+    tc=tinycloud(conf_dir)
     app=tc.app
     print("Server is run at http://{}:{}".format(config.conf["http"]["addr"], config.conf["http"]["port"]))
     WSGIServer((config.conf["http"]["addr"], config.conf["http"]["port"]), app).serve_forever()
