@@ -10,7 +10,8 @@ class dav():
         self.auth=auth
         self.acl=acl
         self.fs=fs
-    def request(self,path=""):
+        self.__name__=""
+    def __call__(self,path=""):
         path=os.path.normpath("/"+path)
 
         if ".." in path:
