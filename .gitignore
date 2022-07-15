@@ -1,5 +1,5 @@
-test/
+*test*
 __pycache__/
 .venv/
 *.swp
-
+dist/
