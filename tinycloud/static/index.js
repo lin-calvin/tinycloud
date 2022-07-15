@@ -54,11 +54,11 @@ class tinycloud extends s {
     if (this.url) {
       filelist.url = this.url;
     }
-    filelist.load_data();
     var fileupload = new tc_fileupload();
     fileupload.url = this.url;
     fileupload.reload_func = filelist.load_data;
     filelist.file_upload = fileupload;
+    filelist.load_data();
     return $`<p align="center">Tinycloud0.1</p><hr>${filelist}${fileupload}`;
   }
 }
@@ -67,9 +67,11 @@ class tc_filelist extends s {
   static properties = { files: {}, url: {}, menu: {}, file_upload: {} };
   static styles = r$2`a{color:var(--tc-link-color,#00f)}`;
   load_data = () => {
+    this.file_upload.style.display="none";
     fetch("/dav" + this.url + "?json_mode=1", { method: "PROPFIND" }).then(
       (res) => {
         if (res.ok) {
+          this.file_upload.style.display="block";
           res.json().then((res) => (this.files = res.files));
         } else {
           location.href="#"+this.url.split("/").slice(0, -2).join("/");
@@ -143,7 +145,7 @@ class tc_filelist extends s {
     this.menu = new tc_contextmenu();
     this.url = "/";
     console.log(this.menu);
-    this.load_data(); //fetch("/dav/"+"/"+"?json_mode=1",{  method: 'PROPFIND'}).then(res=>{res.json().then(res=>this.files=res.files)})
+    //this.load_data(); //fetch("/dav/"+"/"+"?json_mode=1",{  method: 'PROPFIND'}).then(res=>{res.json().then(res=>this.files=res.files)})
     //    this.renderRoot.addEventListener("contextmenu",this.contextmenu)
   }
   // Render the UI as a function of component stat
