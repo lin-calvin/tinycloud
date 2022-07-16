@@ -16,30 +16,30 @@ import base64
 import acl
 
 faulthandler.enable()
-mm=mod_manger.mod_manger
 
-class tinycloud():
+class tinycloud(Flask):
     def __init__(self,confdir):
-        self.app = Flask(__name__)
+        super().__init__(__name__)
+        self.mm=mod_manger.mod_manger()
         config.load_conf(os.path.join(confdir+"/config.yaml"))
         auth_type=config.conf["auth"]["type"]
         if auth_type!=None:
-            mm.load_mod(auth_type)
-            self.auth=getattr(mm,auth_type).auth()
+            self.mm.load_mod(auth_type)
+            self.auth=getattr(self.mm,auth_type).auth()
         else:
             self.auth=None
         self.acl=acl.acl()
-        self.fs=vfs.fs()
+        self.fs=vfs.fs(mod_manger=self.mm)
         self.dav=dav.dav(self.fs,auth=self.auth,acl=self.acl)
         for _fs in config.conf["storages"]:
-            mm.load_mod(_fs['type'])
+            self.mm.load_mod(_fs['type'])
             opts=copy.copy(_fs)
             opts.pop('type')
             opts.pop('name')
             self.fs.mount(_fs['type'],_fs['name'],opts)
-        self.app.add_url_rule("/dav/<path:path>",methods=["GET","PUT","PROPFIND","DELETE","MKCOL"],view_func=self.dav)
-        self.app.add_url_rule("/dav/",methods=["GET","PUT","PROPFIND","DELETE","MKCOL"],view_func=self.dav)
-        self.app.add_url_rule("/",view_func=self.main_page)
+        self.add_url_rule("/dav/<path:path>",methods=["GET","PUT","PROPFIND","DELETE","MKCOL"],view_func=self.dav)
+        self.add_url_rule("/dav/",methods=["GET","PUT","PROPFIND","DELETE","MKCOL"],view_func=self.dav)
+        self.add_url_rule("/",view_func=self.main_page)
     def main_page(self):
         if self.auth:
             if  request.headers.get("Authorization"):
@@ -66,6 +66,5 @@ if __name__=="__main__":
     else:
         conf_dir="conf"
     tc=tinycloud(conf_dir)
-    app=tc.app
     print("Server is run at http://{}:{}".format(config.conf["http"]["addr"], config.conf["http"]["port"]))
-    WSGIServer((config.conf["http"]["addr"], config.conf["http"]["port"]), app).serve_forever()
+    WSGIServer((config.conf["http"]["addr"], config.conf["http"]["port"]), tc).serve_forever()

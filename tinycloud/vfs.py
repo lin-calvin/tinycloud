@@ -1,13 +1,13 @@
-from mod_manger import mod_manger as mm
 class fs():
-    def __init__(self):
+    def __init__(self,mod_manger):
+        self.mm=mod_manger
         self.mount_table={}
     def mount(self,module,path,args):
         """
             mount(module,mount point,args for module)
         """
         try:
-            fsmod=getattr(mm,module)
+            fsmod=getattr(self.mm,module)
         except:
             print("err")
         self.mount_table[path]=fsmod.fs(**args)
