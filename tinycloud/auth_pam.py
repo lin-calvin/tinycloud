@@ -11,4 +11,4 @@ class auth:
             utils.log.box_message("Run as a non-root user,pam may not work")
 
     def do_auth(self, user, passwd):
-        return True  # pam.authenticate(user,passwd)
+        return pam.authenticate(user,passwd)

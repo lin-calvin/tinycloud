@@ -1,8 +1,8 @@
 import email.utils
 import datetime
 import math
-
-
+from flask import request,make_response
+import base64
 def calc_size(size: str):
     """
     Claculate size from a string
@@ -19,9 +19,23 @@ def time_as_rfc(timestamp: int):
     Convert timestamp to RFC2822 format
     """
     return email.utils.format_datetime(datetime.datetime.fromtimestamp(timestamp))
+def chk_auth(auth):
+    if auth:
+        if request.headers.get("Authorization"):
+            pw = request.headers["Authorization"]
+            username, password = (
+                base64.b64decode(pw[6:]).decode("utf8", "ignore").split(":")
+            )
+            res = auth.do_auth(username, password)
+            if not res:
+                resp = make_response("Need auth")
+                resp.headers["WWW-Authenticate"] = r'Basic realm="Secure Area"'
+                return resp, 401
+        else:
+            resp = make_response("Need auth")
+            resp.headers["WWW-Authenticate"] = r'Basic realm="Secure Area"'
+            return resp, 401
 
-
-debug = 1
 
 
 class log:

@@ -1,10 +1,12 @@
 import yaml
 import os
 
-
-def load_conf(path):
-    global conf
-    global conf_dir
-    conf_dir = os.path.dirname(path)
-    file = open(path)
-    conf = yaml.safe_load(file.read())
+class config:
+    def load_conf(self,path):
+        self.file_name =path
+        file = open(path,"r")
+        self.conf = yaml.safe_load(file.read())
+        file.close()
+    def save_conf(self):
+        file=open(self.file_name,"w")
+        yaml.dump(self.conf,file)
