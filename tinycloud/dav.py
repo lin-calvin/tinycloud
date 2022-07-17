@@ -13,7 +13,6 @@ class dav():
         self.__name__=""
     def __call__(self,path=""):
         path=os.path.normpath("/"+path)
-
         if ".." in path:
             return "",400
         #path=utils.clean_path(path)
@@ -57,7 +56,10 @@ class dav():
             print(mimetypes.guess_type(path)[0])
             return Response(resp,mimetype=mimetypes.guess_type(path)[0])
         if request.method=="PUT":
-            if type(self.fs.write(path,request.stream))==int:
+            print(1)
+            ret=self.fs.write(path,request.stream)
+            print(ret)
+            if type(ret)==int:
                 return '',404
             return ""
         if request.method=="DELETE":

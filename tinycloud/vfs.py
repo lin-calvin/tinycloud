@@ -1,3 +1,4 @@
+import os
 class fs():
     def __init__(self,mod_manger):
         self.mm=mod_manger
@@ -14,8 +15,9 @@ class fs():
         print("Mount {} on {} success".format(module,path))
     def get_fs(self,path):
         for mount_point in self.mount_table:
-            if mount_point==path[:len(mount_point)]:
-                return mount_point
+            p=list(filter(('').__ne__,path.split('/')))
+            if mount_point==p[0]:
+                return self.mount_table[p[0]],'/'.join(p[1:])
         return -1
     def list(self,path):
         if path=="/" or path=="":
@@ -25,27 +27,27 @@ class fs():
             return res
         if path.startswith("/"):
             path=path[1:]
-        mount_point=self.get_fs(path)
-        if mount_point==-1:
+        fs,p=self.get_fs(path)
+        if fs==-1:
             return -1
-        return self.mount_table[mount_point].list(path[len(mount_point):])
+        return fs.list(p)
     def read(self,path):
-        mount_point=self.get_fs(path)
-        if mount_point==-1:
+        fs,path=self.get_fs(path)
+        if fs==-1:
             return -1
-        return self.mount_table[mount_point].read(path[len(mount_point):])
+        return fs.read(path)
     def mkdir(self,path):
-        mount_point=self.get_fs(path)
-        if mount_point==-1:
+        fs,path=self.get_fs(path)
+        if fs==-1:
             return -1
-        return self.mount_table[mount_point].mkdir(path[len(mount_point):])
+        return fs.mkdir(path)
     def write(self,path,data):
-        mount_point=self.get_fs(path)
-        if mount_point==-1:
+        fs,path=self.get_fs(path)
+        if fs==-1:
             return -1
-        return self.mount_table[mount_point].write(path[len(mount_point):],data)
+        return fs.write(path,data)
     def delete(self,path):
-        mount_point=self.get_fs(path)
-        if mount_point==-1:
+        fs,path=self.get_fs(path)
+        if fs==-1:
           return -1
-        return self.mount_table[mount_point].delete(path[len(mount_point):])
+        return fs.delete(path)

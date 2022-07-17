@@ -56,8 +56,7 @@ class tinycloud(Flask):
                 return resp,401
         return send_file('static/index.html')
 
-
-if __name__=="__main__":
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-c","--config")
     args = parser.parse_args()
@@ -68,3 +67,7 @@ if __name__=="__main__":
     tc=tinycloud(conf_dir)
     print("Server is run at http://{}:{}".format(config.conf["http"]["addr"], config.conf["http"]["port"]))
     WSGIServer((config.conf["http"]["addr"], config.conf["http"]["port"]), tc).serve_forever()
+
+
+if __name__=="__main__":
+    main()

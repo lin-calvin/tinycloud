@@ -12,10 +12,15 @@ class fs():
         if os.path.isdir(self.path+"/"+path):
             path=self.path+"/"+path
             for file in os.listdir(path):
-                ftype=["file","dir"][int(os.path.isdir(path+"/"+file))]
                 fname=file
-                fsize=os.path.getsize(path+"/"+file)
-                ftime=time_as_rfc(os.stat(path+"/"+file).st_ctime)
+                try:
+                    ftype=["file","dir"][int(os.path.isdir(path+"/"+file))]
+                    fsize=os.path.getsize(path+"/"+file)
+                    ftime=time_as_rfc(os.stat(path+"/"+file).st_ctime)
+                except:
+                    ftype='dir'
+                    fsize=0
+                    ftime=time_as_rfc(0)
                 res.append({"type":ftype,"name":fname,"path":path+"/"+file,"size":fsize,"time":ftime})
             #ftype="dir"
             #fsize=os.path.getsize(path+"/"+file)
@@ -41,7 +46,7 @@ class fs():
         else:
             return -1
     def write(self,path,stream,chunk_size="1M"):
-        file=open(self.path+path,"wb")
+        file=open(os.path.join(self.path,path),"wb")
         chunk_size=calc_size(chunk_size)
         while 1:
             data=stream.read(chunk_size)
@@ -55,3 +60,4 @@ class fs():
     def mkdir(self,path):
         os.mkdir(self.path+path)
         return "OK"
+
