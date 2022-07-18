@@ -1,3 +1,4 @@
-calvin:
+foo:
   deny:
-   - /local/static
+   - /foo/bar
+
