@@ -56,7 +56,6 @@ class tinycloud(Flask):
         )
         self.add_url_rule("/", view_func=self.main_page)
         self.add_url_rule("/api/confmgr",view_func=self.confmgr, methods=["GET","POST"])
-        
     def main_page(self):
         if self.auth:
             if request.headers.get("Authorization"):
@@ -84,6 +83,8 @@ def main():
         conf_dir = args.config
     else:
         conf_dir = "conf"
+    if not os.path.exists(conf_dir):
+        exit(255)
     tc = tinycloud(conf_dir)
     print(
         "Server is run at http://{}:{}".format(
