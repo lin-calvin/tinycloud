@@ -57,3 +57,6 @@ def clean_path(str):
             continue
         output.append(str[i])
     return "".join(output)
+
+
+fs_context=type.__new__(type,'fs_context',(),{'username':str()})()
