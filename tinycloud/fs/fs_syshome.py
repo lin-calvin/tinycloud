@@ -17,11 +17,11 @@ class fs:
 
     def list(self, path="/"):
         res = []
-        home=self.get_home(username)
-        if not os.path.exists(self.path + "/" + path):
+        home=self.get_home(fs_context.username)
+        if not os.path.exists(home + "/" + path):
             return -1
-        if os.path.isdir(self.path + "/" + path):
-            path = self.path + "/" + path
+        if os.path.isdir(home + "/" + path):
+            path = home + "/" + path
             for file in os.listdir(path):
                 fname = file
                 try:
@@ -63,9 +63,10 @@ class fs:
         return res
 
     def read(self, path, chunk_size="1M"):
+        home=self.get_home(fs_context.username)
         chunk_size = calc_size(chunk_size)
-        if os.path.isfile(self.path + path):
-            file = open(self.path + path, "rb")
+        if os.path.isfile(home + path):
+            file = open(home + path, "rb")
             while 1:
                 data = file.read(chunk_size)
                 if not data:
@@ -75,7 +76,8 @@ class fs:
             return -1
 
     def write(self, path, stream, chunk_size="1M"):
-        file = open(os.path.join(self.path, path), "wb")
+        home=self.get_home(fs_context.username)
+        file = open(os.path.join(home, path), "wb")
         chunk_size = calc_size(chunk_size)
         while 1:
             data = stream.read(chunk_size)
@@ -85,9 +87,11 @@ class fs:
             file.write(data)
 
     def delete(self, path):
-        os.remove(self.path + path)
+        home=self.get_home(fs_context.username)
+        os.remove(home + path)
         return "OK"
 
     def mkdir(self, path):
-        os.mkdir(self.path + path)
+        home=self.get_home(fs_context.username)
+        os.mkdir(home + path)
         return "OK"

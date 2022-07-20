@@ -34,6 +34,7 @@ class dav:
                 resp = make_response("Need auth")
                 resp.headers["WWW-Authenticate"] = r'Basic realm="Secure Area"'
                 return resp, 401
+        utils.fs_context.username=username
         if self.acl:
             res = self.acl.check(path, username)
             if not res:
