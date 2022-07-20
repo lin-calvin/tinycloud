@@ -1,2 +1,5 @@
-global-include ./tinycloud/
-global-exclude .venv .git *.swo __pycache__
+include tinycloud/fs/*
+include tinycloud/static/**
+include tinycloud/templates/**
+
+grafr ./tinycloud/**
