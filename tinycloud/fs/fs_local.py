@@ -9,12 +9,11 @@ class fs:
 
     def list(self, path="/"):
         res = []
-        if not os.path.exists(self.path + "/" + path):
+        if not os.path.exists(os.path.join(self.path , path)):
             return -1
-        if os.path.isdir(self.path + "/" + path):
-            path = self.path + "/" + path
+        if os.path.isdir(os.path.join(self.path , path)):
+            path = os.path.join(self.path , path)
             for file in os.listdir(path):
-                fname = file
                 try:
                     ftype = ["file", "dir"][int(os.path.isdir(path + "/" + file))]
                     fsize = os.path.getsize(path + "/" + file)
@@ -26,7 +25,7 @@ class fs:
                 res.append(
                     {
                         "type": ftype,
-                        "name": fname,
+                        "name": name,
                         "path": path + "/" + file,
                         "size": fsize,
                         "time": ftime,
@@ -76,9 +75,9 @@ class fs:
             file.write(data)
 
     def delete(self, path):
-        os.remove(self.path + path)
+        os.remove(os.path.join(self.path , path))
         return "OK"
 
     def mkdir(self, path):
-        os.mkdir(self.path + path)
+        os.mkdir(os.path.join(self.path , path))
         return "OK"

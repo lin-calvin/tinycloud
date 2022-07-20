@@ -1,4 +1,5 @@
 import os
+import shutil
 import time
 from utils import *
 
@@ -77,7 +78,9 @@ class fs:
 
     def write(self, path, stream, chunk_size="1M"):
         home=self.get_home(fs_context.username)
-        file = open(os.path.join(home, path), "wb")
+        filename=os.path.join(home, path)
+        file = open(filename, "wb")
+        shutil.chown(filename,user=fs_context.username)
         chunk_size = calc_size(chunk_size)
         while 1:
             data = stream.read(chunk_size)
@@ -88,10 +91,10 @@ class fs:
 
     def delete(self, path):
         home=self.get_home(fs_context.username)
-        os.remove(home + path)
+        os.remove(os.path.join(home , path))
         return "OK"
 
     def mkdir(self, path):
         home=self.get_home(fs_context.username)
-        os.mkdir(home + path)
+        os.mkdir(os.path.joim(home , path))
         return "OK"
