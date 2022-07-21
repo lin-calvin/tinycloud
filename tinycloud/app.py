@@ -84,6 +84,7 @@ def main():
     else:
         conf_dir = "conf"
     if not os.path.exists(conf_dir):
+        print(sys.argv[0]+": "+conf_dir+": No such file or directory")
         exit(255)
     tc = tinycloud(conf_dir)
     print(

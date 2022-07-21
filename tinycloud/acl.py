@@ -2,7 +2,6 @@ import config
 import os
 import yaml
 
-
 class acl:
     def __init__(self,confdir):
         aclfile = open(os.path.join(confdir, "acl.yaml"))
