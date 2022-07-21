@@ -67,7 +67,7 @@ class fs:
         home=self.get_home(fs_context.username)
         chunk_size = calc_size(chunk_size)
         if os.path.isfile(os.path.join(home , path)):
-            file = open(os.file.join(home , path), "rb")
+            file = open(os.path.join(home , path), "rb")
             while 1:
                 data = file.read(chunk_size)
                 if not data:
