@@ -1,5 +1,4 @@
 include tinycloud/fs/*
 include tinycloud/static/**
 include tinycloud/templates/**
-
-grafr ./tinycloud/**
+include tinycloud/conf/**
