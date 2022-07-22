@@ -1,4 +1,3 @@
 foo:
   deny:
-   - /foo/bar
-
+    - /foo/bar

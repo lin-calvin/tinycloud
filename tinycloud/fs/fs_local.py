@@ -25,7 +25,7 @@ class fs:
                 res.append(
                     {
                         "type": ftype,
-                        "name": name,
+                        "name": file,
                         "path": path + "/" + file,
                         "size": fsize,
                         "time": ftime,

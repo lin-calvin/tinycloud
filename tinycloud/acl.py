@@ -6,7 +6,6 @@ class acl:
     def __init__(self,confdir):
         aclfile = open(os.path.join(confdir, "acl.yaml"))
         self.acl = yaml.safe_load(aclfile.read())
-        print(self.acl)
 
     def check(self, path, user):
         if not user in self.acl:
