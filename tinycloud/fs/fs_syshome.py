@@ -19,6 +19,8 @@ class fs:
     def list(self, path="/"):
         res = []
         home=self.get_home(fs_context.username)
+        if home==-1:
+            return -1
         if not os.path.exists(home + "/" + path):
             return -1
         if os.path.isdir(home + "/" + path):
@@ -30,7 +32,7 @@ class fs:
                     fsize = os.path.getsize(path + "/" + file)
                     ftime = time_as_rfc(os.stat(path + "/" + file).st_ctime)
                 except:
-                    ftype = "dir"
+                    ftype = "broken"
                     fsize = 0
                     ftime = time_as_rfc(0)
                 res.append(
@@ -65,6 +67,8 @@ class fs:
 
     def read(self, path, chunk_size="1M"):
         home=self.get_home(fs_context.username)
+        if home==-1:
+            return -1
         chunk_size = calc_size(chunk_size)
         if os.path.isfile(os.path.join(home , path)):
             file = open(os.path.join(home , path), "rb")
@@ -78,6 +82,8 @@ class fs:
 
     def write(self, path, stream, chunk_size="1M"):
         home=self.get_home(fs_context.username)
+        if home==-1:
+            return -1
         filename=os.path.join(home, path)
         file = open(filename, "wb")
         shutil.chown(filename,user=fs_context.username)
@@ -91,10 +97,14 @@ class fs:
 
     def delete(self, path):
         home=self.get_home(fs_context.username)
+        if home==-1:
+            return -1
         os.remove(os.path.join(home , path))
         return "OK"
 
     def mkdir(self, path):
         home=self.get_home(fs_context.username)
+        if home==-1:
+            return -1
         os.mkdir(os.path.joim(home , path))
         return "OK"
