@@ -1,11 +1,8 @@
 auth:
-  type: auth_pass
+  type: auth_pam
 http:
   addr: 0.0.0.0
   port: 8988
 storages:
   - name: <root>
     type: fs.fs_syshome
-  - name: local
-    type: fs.fs_local
-    path: /

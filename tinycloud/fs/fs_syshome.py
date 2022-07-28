@@ -70,13 +70,17 @@ class fs:
         if home==-1:
             return -1
         chunk_size = calc_size(chunk_size)
-        if os.path.isfile(os.path.join(home , path)):
-            file = open(os.path.join(home , path), "rb")
+        if os.path.getsize(os.path.join(home, path))<chunk_size:
+            chunk_size=os.path.getsize(os.path.join(home, path))
+        def reader():
             while 1:
                 data = file.read(chunk_size)
                 if not data:
                     break
                 yield data
+        if os.path.isfile(os.path.join(home , path)):
+            file = open(os.path.join(home , path), "rb")
+            return reader(),os.path.getsize(os.path.join(home , path))
         else:
             return -1
 

@@ -53,13 +53,14 @@ class dav:
             resp.headers["DAV"] = "1,2"
             return resp
         if request.method == "GET":
-            resp = self.fs.read(path)
+            resp,length = self.fs.read(path)
             if path == "":
                 return ""
             if resp == -1:
                 return "", 404
-            print(mimetypes.guess_type(path)[0])
-            return Response(resp, mimetype=mimetypes.guess_type(path)[0])
+            resp=Response(resp, mimetype=mimetypes.guess_type(path)[0])
+            resp.content_length=length
+            return resp
         if request.method == "PUT":
             print(1)
             ret = self.fs.write(path, request.stream)

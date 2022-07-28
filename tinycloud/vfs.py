@@ -30,6 +30,8 @@ class fs:
             for a in self.mount_table:
                 if a=="<root>":
                     fs,_=self.get_fs("<root>")
+                    if fs==-1:
+                        continue
                     res.extend(fs.list("/"))
                 else:
                     res.append({"type": "mountpoint", "name": a, "path": a, "size": 4000})
