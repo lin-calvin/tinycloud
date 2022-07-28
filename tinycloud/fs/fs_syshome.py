@@ -110,5 +110,5 @@ class fs:
         home=self.get_home(fs_context.username)
         if home==-1:
             return -1
-        os.mkdir(os.path.joim(home , path))
+        os.mkdir(os.path.join(home , path))
         return "OK"
