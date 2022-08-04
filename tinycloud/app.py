@@ -17,7 +17,7 @@ import mod_manger
 import confmgr
 import config
 import acl
-
+import utils
 
 faulthandler.enable()
 
@@ -57,21 +57,9 @@ class tinycloud(Flask):
         self.add_url_rule("/", view_func=self.main_page)
         self.add_url_rule("/api/confmgr",view_func=self.confmgr, methods=["GET","POST"])
     def main_page(self):
-        if self.auth:
-            if request.headers.get("Authorization"):
-                pw = request.headers["Authorization"]
-                username, password = (
-                    base64.b64decode(pw[6:]).decode("utf8", "ignore").split(":")
-                )
-                res = self.auth.do_auth(username, password)
-                if not res:
-                    resp = make_response("Need auth")
-                    resp.headers["WWW-Authenticate"] = r'Basic realm="Login required"'
-                    return resp, 401
-            else:
-                resp = make_response("Need auth")
-                resp.headers["WWW-Authenticate"] = r'Basic realm="Login required"'
-                return resp, 401
+        res=utils.chk_auth(self.auth)
+        if res:
+            return res
         return send_file("static/index.html")
 
 
