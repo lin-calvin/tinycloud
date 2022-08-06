@@ -18,25 +18,13 @@ class dav:
         path = os.path.normpath("/" + path)
         if ".." in path:
             return "", 400
-        # path=utils.clean_path(path)
-        if self.auth:
-            if request.headers.get("Authorization"):
-                pw = request.headers["Authorization"]
-                username, password = (
-                    base64.b64decode(pw[6:]).decode("utf8", "ignore").split(":")
-                )
-                res = self.auth.do_auth(username, password)
-                if not res:
-                    resp = make_response("Need auth")
-                    resp.headers["WWW-Authenticate"] = r'Basic realm="Secure Area"'
-                    return resp, 401
-            else:
-                resp = make_response("Need auth")
-                resp.headers["WWW-Authenticate"] = r'Basic realm="Secure Area"'
-                return resp, 401
-        utils.fs_context.username=username
+        res=utils.chk_auth(self.auth)
+        print(res)
+        if res:
+            return res
+        utils.fs_context.username=utils.get_http_passwd()[0]
         if self.acl:
-            res = self.acl.check(path, username)
+            res = self.acl.check(path, utils.fs_context.username)
             if not res:
                 return "", 403
         if request.method == "PROPFIND":  # 返回目录下的文件

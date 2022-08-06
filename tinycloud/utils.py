@@ -37,7 +37,9 @@ def chk_auth(auth):
             resp = make_response("Need auth")
             resp.headers["WWW-Authenticate"] = r'Basic realm="Secure Area"'
             return resp, 401
-
+def get_http_passwd():
+    pw = request.headers["Authorization"]
+    return base64.b64decode(pw[6:]).decode("utf8", "ignore").split(":")
 
 
 class log:

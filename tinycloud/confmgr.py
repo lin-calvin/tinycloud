@@ -10,7 +10,7 @@ class confmgr():
         if res:
             return res
         if request.method=="GET":
-            return self.config.conf
+            return self.config
         if request.method=="POST":
             self.config.conf=request.json
             self.config.save_conf()

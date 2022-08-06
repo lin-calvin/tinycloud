@@ -3,6 +3,7 @@ import os, sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from flask import Flask, redirect, url_for, send_file, request, make_response
+from flask.logging import default_handler
 import argparse
 import faulthandler
 import sys
@@ -10,6 +11,7 @@ from gevent.pywsgi import WSGIServer
 import os
 import copy
 import base64
+import logging
 
 import dav
 import vfs
@@ -21,10 +23,12 @@ import utils
 
 faulthandler.enable()
 
+logging.basicConfig(filename='logger.log', level=logging.INFO)
 
 class tinycloud(Flask):
     def __init__(self, confdir):
         super().__init__(__name__)
+
         self.mm = mod_manger.mod_manger()
         self.conf=utils.load_conf(os.path.join(confdir + "/config.yaml"))
         auth_type = self.conf["auth"]["type"]

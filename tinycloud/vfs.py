@@ -1,5 +1,5 @@
 import os
-
+import logging
 
 class fs:
     def __init__(self, mod_manger):
@@ -15,7 +15,7 @@ class fs:
         except:
             print("err")
         self.mount_table[path] = fsmod.fs(**args)
-        print("Mount {} on {} success".format(module, path))
+        logging.info("Mount {} on {} success".format(module, path))
 
     def get_fs(self, path):
         for mount_point in self.mount_table:
