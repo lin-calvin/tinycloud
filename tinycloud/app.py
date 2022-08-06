@@ -15,7 +15,7 @@ import dav
 import vfs
 import mod_manger
 import confmgr
-import config
+
 import acl
 import utils
 
@@ -26,24 +26,24 @@ class tinycloud(Flask):
     def __init__(self, confdir):
         super().__init__(__name__)
         self.mm = mod_manger.mod_manger()
-        self.conf=config.config()
-        self.conf.load_conf(os.path.join(confdir + "/config.yaml"))
-        auth_type = self.conf.conf["auth"]["type"]
+        self.conf=utils.load_conf(os.path.join(confdir + "/config.yaml"))
+        auth_type = self.conf["auth"]["type"]
         if auth_type != None:
             self.mm.load_mod(auth_type)
             self.auth = getattr(self.mm, auth_type).auth()
         else:
             self.auth = None
         self.confmgr=confmgr.confmgr(self.conf,auth=self.auth)
-        self.acl = acl.acl(confdir)
-        self.fs = vfs.fs(mod_manger=self.mm)
-        self.dav = dav.dav(self.fs, auth=self.auth, acl=self.acl)
-        for _fs in self.conf.conf["storages"]:
+        if os.path.exists(os.path.join(confdir,"acl.yaml")):
+            self.acl = acl.acl(os.path.join(confdir,"acl.yaml"))
+        self.vfs = vfs.fs(mod_manger=self.mm)
+        self.dav = dav.dav(self)
+        for _fs in self.conf["storages"]:
             self.mm.load_mod(_fs["type"])
             opts = copy.copy(_fs)
             opts.pop("type")
             opts.pop("name")
-            self.fs.mount(_fs["type"], _fs["name"], opts)
+            self.vfs.mount(_fs["type"], _fs["name"], opts)
         self.add_url_rule(
             "/dav/<path:path>",
             methods=["GET", "PUT", "PROPFIND", "DELETE", "MKCOL"],
@@ -56,13 +56,16 @@ class tinycloud(Flask):
         )
         self.add_url_rule("/", view_func=self.main_page)
         self.add_url_rule("/api/confmgr",view_func=self.confmgr, methods=["GET","POST"])
+        self.after_request(self.hook_request)
     def main_page(self):
         res=utils.chk_auth(self.auth)
         if res:
             return res
         return send_file("static/index.html")
 
-
+    def hook_request(self,response):
+        response.headers['Server']="Tinycloud"
+        return response
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config")
@@ -77,11 +80,11 @@ def main():
     tc = tinycloud(conf_dir)
     print(
         "Server is run at http://{}:{}".format(
-            tc.conf.conf["http"]["addr"], tc.conf.conf["http"]["port"]
+            tc.conf["http"]["addr"], tc.conf["http"]["port"]
         )
     )
     WSGIServer(
-        (tc.conf.conf["http"]["addr"], tc.conf.conf["http"]["port"]), tc
+        (tc.conf["http"]["addr"], tc.conf["http"]["port"]), tc
     ).serve_forever()
 
 

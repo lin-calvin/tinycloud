@@ -8,10 +8,10 @@ import os
 
 
 class dav:
-    def __init__(self, fs, auth=None, acl=None):
-        self.auth = auth
-        self.acl = acl
-        self.fs = fs
+    def __init__(self,parent):
+        self.auth = parent.auth
+        self.acl = parent.acl
+        self.fs = parent.vfs
         self.__name__ = ""
 
     def __call__(self, path=""):

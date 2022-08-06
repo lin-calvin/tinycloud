@@ -3,6 +3,8 @@ import datetime
 import math
 from flask import request,make_response
 import base64
+import yaml
+
 def calc_size(size: str):
     """
     Claculate size from a string
@@ -49,14 +51,14 @@ class log:
         print("#" + txt + "#")
         print("#" * (len(txt) + 2))
 
-
-def clean_path(str):
-    output = []
-    for i in range(len(str)):
-        if str[i] == "/" and i != len(str) and str[i + 1] == "/":
-            continue
-        output.append(str[i])
-    return "".join(output)
+def load_conf(path):
+    file = open(path,"r")
+    conf= yaml.safe_load(file.read())
+    file.close()
+    return conf
+def save_conf(conf,file_name):
+    file=open(file_name,"w")
+    yaml.dump(conf,file)
 
 
 fs_context=type.__new__(type,'fs_context',(),{'username':str()})()
