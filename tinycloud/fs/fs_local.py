@@ -54,19 +54,6 @@ class fs:
 
     def read(self, path, chunk_size="1M"):
         chunk_size = calc_size(chunk_size)
-        if os.path.isfile(self.path + path):
-            file = open(self.path + path, "rb")
-            while 1:
-                data = file.read(chunk_size)
-                if not data:
-                    break
-                yield data
-        else:
-            return -1
-
-    def write(self, path, stream, chunk_size="1M"):
-        file = open(os.path.join(self.path, path), "wb")
-        chunk_size = calc_size(chunk_size)
         if os.path.getsize(os.path.join(self.path, path))<chunk_size:
             chunk_size=os.path.getsize(os.path.join(self.path, path))
         def reader():
@@ -80,6 +67,17 @@ class fs:
             return reader(),os.path.getsize(os.path.join(self.path, path))
         else:
             return -1
+    def write(self, path, stream, chunk_size="1M"):
+        file = open(os.path.join(self.path, path), "wb")
+        file = open(filename, "wb")
+        shutil.chown(filename,user=fs_context.username)
+        chunk_size = calc_size(chunk_size)
+        while 1:
+            data = stream.read(chunk_size)
+            if not data:
+                file.close()
+                break
+            file.write(data)
 
     def delete(self, path):
         os.remove(os.path.join(self.path , path))
