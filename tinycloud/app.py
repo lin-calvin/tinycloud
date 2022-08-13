@@ -1,3 +1,5 @@
+DEF_CONFIG=['~/.config/tinycloud','conf','/etc/tinycloud']
+
 import os, sys
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -71,6 +73,11 @@ def main():
         conf_dir = args.config
     else:
         conf_dir = "conf"
+    if not os.path.exists(conf_dir):
+        for i in DEF_CONFIG:
+            if os.path.exists(i):
+                conf_dir=i
+                break
     if not os.path.exists(conf_dir):
         print(sys.argv[0]+": "+conf_dir+": No such file or directory")
         exit(255)
