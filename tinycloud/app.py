@@ -56,8 +56,10 @@ class tinycloud(Flask):
         res=utils.chk_auth(self.auth)
         if res:
             return res
-        return send_file("static/index.html")
-
+        try:
+            return send_file("static/index.html1")
+        except FileNotFoundError:
+            return 'Frontend file dosn\'t installd'
     def hook_request(self,response):
         response.headers['Server']="Tinycloud"
         return response
