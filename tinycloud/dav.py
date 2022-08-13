@@ -1,4 +1,4 @@
-from flask import render_template, request, make_response, Response
+from flask import render_template, request, make_response, Response, Blueprint
 import errno
 import base64
 import json
@@ -9,11 +9,21 @@ import os
 
 class dav:
     def __init__(self,parent):
+        self.api=Blueprint('api', __name__, url_prefix='/dav')
         self.auth = parent.auth
         self.acl = parent.acl
         self.fs = parent.vfs
         self.__name__ = ""
-
+        self.api.add_url_rule(
+            "/<path:path>",
+            methods=["GET", "PUT", "PROPFIND", "DELETE", "MKCOL"],
+            view_func=self,
+        )
+        self.api.add_url_rule(
+            "/",
+            methods=["GET", "PUT", "PROPFIND", "DELETE", "MKCOL"],
+            view_func=self,
+        )
     def __call__(self, path=""):
         path = os.path.normpath("/" + path)
         if ".." in path:

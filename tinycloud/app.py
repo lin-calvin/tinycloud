@@ -48,16 +48,7 @@ class tinycloud(Flask):
             opts.pop("type")
             opts.pop("name")
             self.vfs.mount(_fs["type"], _fs["name"], opts)
-        self.add_url_rule(
-            "/dav/<path:path>",
-            methods=["GET", "PUT", "PROPFIND", "DELETE", "MKCOL"],
-            view_func=self.dav,
-        )
-        self.add_url_rule(
-            "/dav/",
-            methods=["GET", "PUT", "PROPFIND", "DELETE", "MKCOL"],
-            view_func=self.dav,
-        )
+        self.register_blueprint(self.dav.api)
         self.add_url_rule("/", view_func=self.main_page)
         self.add_url_rule("/api/confmgr",view_func=self.confmgr, methods=["GET","POST"])
         self.after_request(self.hook_request)
