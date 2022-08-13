@@ -57,7 +57,7 @@ class tinycloud(Flask):
         if res:
             return res
         try:
-            return send_file("static/index.html1")
+            return send_file("static/index.html")
         except FileNotFoundError:
             return 'Frontend file dosn\'t installd'
     def hook_request(self,response):
