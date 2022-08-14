@@ -88,7 +88,7 @@ def main():
         )
     )
     WSGIServer(
-        (tc.conf["http"]["addr"], tc.conf["http"]["port"]), tc
+        (tc.conf["http"]["addr"], tc.conf["http"]["port"]), tc, log=None
     ).serve_forever()
 
 
