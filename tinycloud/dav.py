@@ -7,36 +7,43 @@ import mimetypes
 import os
 
 
-class dav:
-    def __init__(self,parent):
-        self.api=Blueprint('api', __name__, url_prefix='/dav')
-        self.auth = parent.auth
-        self.acl = parent.acl
-        self.fs = parent.vfs
+class Dav:
+    def __init__(self,fs,acl=None,auth=None,blueprint=True):
+        print(id(fs))
+        if blueprint:
+            self.api=Blueprint('dav', __name__, url_prefix='/dav')
+            self.api.add_url_rule(
+                "/<path:path>",
+                methods=["GET", "PUT", "PROPFIND", "DELETE", "MKCOL"],
+                view_func=self,
+            )
+            self.api.add_url_rule(
+                "/",
+                methods=["GET", "PUT", "PROPFIND", "DELETE", "MKCOL"],
+                view_func=self,
+            )
+
+        self.auth = auth
+        self.acl = acl
+        self.fs = fs
         self.__name__ = ""
-        self.api.add_url_rule(
-            "/<path:path>",
-            methods=["GET", "PUT", "PROPFIND", "DELETE", "MKCOL"],
-            view_func=self,
-        )
-        self.api.add_url_rule(
-            "/",
-            methods=["GET", "PUT", "PROPFIND", "DELETE", "MKCOL"],
-            view_func=self,
-        )
     def __call__(self, path=""):
         path = os.path.normpath("/" + path)
         if ".." in path:
             return "", 400
-        res=utils.chk_auth(self.auth)
-        print(res)
-        if res:
-            return res
-        utils.fs_context.username=utils.get_http_passwd()[0]
-        if self.acl:
-            res = self.acl.check(path, utils.fs_context.username)
-            if not res:
-                return "", 403
+        if self.auth:
+            res=utils.chk_auth(self.auth)
+            if res:
+                return res
+            utils.fs_context.username=utils.get_http_passwd()[0]
+            if self.acl:
+                res = self.acl.check(path, utils.fs_context.username)
+                if not res:
+                    return "", 403
+        else:
+            ...
+#            if not utils.fs_context.username:
+#                utils.fs_context.username = None
         if request.method == "PROPFIND":  # 返回目录下的文件
             ret = self.fs.list(path)
             if type(ret) == int:

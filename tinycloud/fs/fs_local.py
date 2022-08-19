@@ -69,8 +69,6 @@ class fs:
             return -1
     def write(self, path, stream, chunk_size="1M"):
         file = open(os.path.join(self.path, path), "wb")
-        file = open(filename, "wb")
-        shutil.chown(filename,user=fs_context.username)
         chunk_size = calc_size(chunk_size)
         while 1:
             data = stream.read(chunk_size)

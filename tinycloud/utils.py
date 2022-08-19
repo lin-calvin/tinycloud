@@ -15,13 +15,12 @@ def calc_size(size: str):
     G = K * 1024
     return eval(str(int(size[:-1])) + "*" + size[-1])
 
-
 def time_as_rfc(timestamp: int):
     """
     Convert timestamp to RFC2822 format
     """
     return email.utils.format_datetime(datetime.datetime.fromtimestamp(timestamp))
-def chk_auth(auth):
+def chk_auth(auth,ret='Need auth'):
     if auth:
         if request.headers.get("Authorization"):
             pw = request.headers["Authorization"]

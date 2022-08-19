@@ -24,13 +24,13 @@ class fs:
         if not os.path.exists(home + "/" + path):
             return -1
         if os.path.isdir(home + "/" + path):
-            path = home + "/" + path
-            for file in os.listdir(path):
+            real_path = home + "/" + path
+            for file in os.listdir(real_path):
                 fname = file
                 try:
-                    ftype = ["file", "dir"][int(os.path.isdir(path + "/" + file))]
-                    fsize = os.path.getsize(path + "/" + file)
-                    ftime = time_as_rfc(os.stat(path + "/" + file).st_ctime)
+                    ftype = ["file", "dir"][int(os.path.isdir(real_path + "/" + file))]
+                    fsize = os.path.getsize(real_path + "/" + file)
+                    ftime = time_as_rfc(os.stat(real_path + "/" + file).st_ctime)
                 except:
                     ftype = "broken"
                     fsize = 0
@@ -48,7 +48,7 @@ class fs:
             # fsize=os.path.getsize(path+"/"+file)
             # res.append({"type":ftype,"name":path,"path":path+"/"})
         else:
-            file = path
+            file = real_path
             fsize = os.path.getsize(file)
             ftype = ["file", "dir"][int(os.path.isdir(file))]
             fname = file.split("/")[-1]
