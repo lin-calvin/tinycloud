@@ -3,7 +3,7 @@ import hashlib
 import os
 import json
 
-from flask import Blueprint, request
+from flask import Blueprint, request, send_file
 
 import utils
 import dav
@@ -21,11 +21,18 @@ class Share:
                               methods=["POST"]
                               )
         self.api.add_url_rule(
-                            "/shares/<path:path>",
+                            "/api/shares/dav/<path:path>",
                             methods=["GET", "PUT", "PROPFIND", "DELETE", "MKCOL"],
+                            view_func=self.share_dav,
+        )
+        self.api.add_url_rule(
+                            "/api/shares/info/<idt>",
+                            view_func=self.share_info,
+        )
+        self.api.add_url_rule(
+                            "/shares/<path:path>",
                             view_func=self.view_share,
         )
-
     def do_make_share(self, path, username=None,mode='r'):
         data={'path':path,'username':username,'mode':mode}
         idt = hashlib.sha512((json.dumps(data) + str(random.random())).encode()).hexdigest()[:10]
@@ -38,14 +45,14 @@ class Share:
             return {"error": 403}, 403
         req = request.json
         path = req['path']
-        arg={'path':path,'username':username}
+        args={'path':path,'username':username}
 
         if 'mode'  in req:
              arg['mode']=req['mode']
         res = {'id': self.do_make_share(**args)}
         return res
 
-    def view_share(self, path):
+    def share_dav(self, path):
         p = list(filter(''.__ne__, path.split("/")))
         info=self.shares[p[0]]
         path=os.path.join(info['path'], "/".join(p[1:]))
@@ -56,3 +63,7 @@ class Share:
         if info['mode']=='r' and request.method in ['PUT','DELETE','MKCOL']:
             return "",403
         return self.dav(path)
+    def share_info(self,idt):
+        return self.shares[idt]
+    def view_share(self,path):
+        return send_file("static/share.html")
