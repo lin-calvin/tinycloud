@@ -28,7 +28,7 @@ faulthandler.enable()
 
 log=logging.handlers.SysLogHandler(address ='/dev/log')
 #logging.getLogger().addHandler(log)
-logging.basicConfig(filename='/dev/stdout', level=logging.INFO)
+#logging.basicConfig(filename='/dev/stdout', level=logging.INFO)
 
 class Tinycloud(Flask):
     def __init__(self, confdir):
