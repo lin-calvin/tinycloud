@@ -48,7 +48,7 @@ class Share:
         args={'path':path,'username':username}
 
         if 'mode'  in req:
-             arg['mode']=req['mode']
+             args['mode']=req['mode']
         res = {'id': self.do_make_share(**args)}
         return res
 
