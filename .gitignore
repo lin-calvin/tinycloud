@@ -1,6 +1,7 @@
-*test*
 __pycache__/
 .venv/
 *.swp
 dist/
 tinycloud/static/
+tinycloud/conf
+
