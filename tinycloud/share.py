@@ -66,6 +66,6 @@ class Share:
     def share_info(self,idt):
         return self.shares[idt]
     def view_share(self,path):
-	if path.split('/') in self.shares:
+        if path.split('/') in self.shares:
             return send_file("static/share.html")
         return 'Not such share',404

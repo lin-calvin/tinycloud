@@ -57,7 +57,7 @@ class Tinycloud(Flask):
             opts = copy.copy(_fs)
             opts.pop("type")
             opts.pop("name")
-            self.vfs.mount(_fs["type"], _fs["name"], opts)
+            self.vfs.mount(getattr(self.mm,_fs["type"]), _fs["name"], opts)
         
         self.shares=share.Share(fs=self.vfs,auth=self.auth)
         

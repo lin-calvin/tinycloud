@@ -6,16 +6,13 @@ class fs:
         self.mm = mod_manger
         self.mount_table = {}
 
-    def mount(self, module, path, args):
+    def mount(self, fsmod, path, args):
         """
         mount(module,mount point,args for module)
         """
-        try:
-            fsmod = getattr(self.mm, module)
-        except:
-            print("err")
+        
         self.mount_table[path] = fsmod.fs(**args)
-        logging.info("Mount {} on {} success".format(module, path))
+#        logging.info("Mount {} on {} success".format(module, path))
 
     def get_fs(self, path):
         for mount_point in self.mount_table:
