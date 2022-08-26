@@ -1,4 +1,4 @@
 include tinycloud/fs/*
-include tinycloud/static/**
+include tinycloud/static/**/*
 include tinycloud/templates/**
 include tinycloud/conf/**
