@@ -71,9 +71,7 @@ class Dav:
             resp.content_length=length
             return resp
         if request.method == "PUT":
-            print(1)
             ret = self.fs.write(path, request.stream)
-            print(ret)
             if type(ret) == int:
                 return "", 404
             return ""

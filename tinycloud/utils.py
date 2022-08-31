@@ -35,7 +35,7 @@ def time_as_rfc(timestamp: int):
     """
     return email.utils.format_datetime(datetime.datetime.fromtimestamp(timestamp))
 def chk_auth(auth,secret=None):
-    if request.headers.get("Authorization"):
+    if "Authorization" in request.headers:
         pw = request.headers["Authorization"]
         if pw.startswith("Basic"):
             username, password = (
@@ -48,20 +48,28 @@ def chk_auth(auth,secret=None):
                 raise AttributeError("jwt authorization require a secret")
             res=chk_jwt(pw[7:],secret)
             return res
-    else:
-        raise KeyError()
+    if request.cookies['token']:
+        return chk_jwt(request.cookies['token'],secret)
+
+    raise KeyError()
 def get_passwd():
-    try:
-        pw = request.headers["Authorization"]
-        if pw.startswith("Basic"):
-            return base64.b64decode(pw[6:]).decode("utf8", "ignore").split(":")
-        if pw.startswith("Bearer"):
-            payload=base64.b64decode(pw[6:].split(".")[1]).decode("utf8", "ignore")
+    if 1:#try:
+        if "Authorization" in request.headers:
+            pw = request.headers["Authorization"]
+            if pw.startswith("Basic"):
+                return base64.b64decode(pw[6:]).decode("utf8", "ignore").split(":")
+            if pw.startswith("Bearer"):
+                payload=base64.b64decode(pw[6:].split(".")[1]).decode("utf8", "ignore")
+                payload=json.loads(payload)
+                return payload["username"],""
+        if request.cookies["token"]:
+            token=request.cookies["token"]
+            payload=base64.b64decode(token[6:].split(".")[1]).decode("utf8", "ignore")
             payload=json.loads(payload)
             return payload["username"],""
-    except (KeyError,base64.binascii.Error):
-        raise ValueError()
-    raise ValueError()
+#    except (KeyError,base64.binascii.Error):
+#        raise ValueError()
+#    raise ValueError()
 class log:
     @staticmethod
     def box_message(txt):
