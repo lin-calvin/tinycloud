@@ -17,15 +17,15 @@ def calc_size(size: str):
     G = K * 1024
     return eval(str(int(size[:-1])) + "*" + size[-1])
 
-def generate_jwt(payload,serect):
+def generate_jwt(payload,secret):
     payload=base64.b64encode(json.dumps(payload).encode()).decode()
     header=base64.b64encode(r'{"typ":"JWT","alg":"HS256"}'.encode()).decode()
-    serect=hmac.new(serect.encode(),(".".join([header,payload])+serect).encode(),digestmod="SHA256").digest()
-    serect=base64.b64encode(serect).decode()
-    return ".".join([header,payload,serect])
-def chech_jwt(jwt,serect):
+    secret=hmac.new(secret.encode(),(".".join([header,payload])+secret).encode(),digestmod="SHA256").digest()
+    secret=base64.b64encode(secret).decode()
+    return ".".join([header,payload,secret])
+def chk_jwt(jwt,secret):
     payload=base64.b64decode(jwt.split('.')[1]).decode()
-    i=generate_jwt(json.loads(payload),serect)
+    i=generate_jwt(json.loads(payload),secret)
     if i==jwt:
         return True
     return False
@@ -34,28 +34,34 @@ def time_as_rfc(timestamp: int):
     Convert timestamp to RFC2822 format
     """
     return email.utils.format_datetime(datetime.datetime.fromtimestamp(timestamp))
-def chk_auth(auth,ret='Need auth'):
-    if auth:
-        if request.headers.get("Authorization"):
-            pw = request.headers["Authorization"]
-
+def chk_auth(auth,secret=None):
+    if request.headers.get("Authorization"):
+        pw = request.headers["Authorization"]
+        if pw.startswith("Basic"):
             username, password = (
                 base64.b64decode(pw[6:]).decode("utf8", "ignore").split(":")
             )
             res = auth.do_auth(username, password)
-            if not res:
-                resp = make_response("Need auth")
-                resp.headers["WWW-Authenticate"] = r'Basic realm="Secure Area"'
-                return resp, 401
-        else:
-            resp = make_response("Need auth")
-            resp.headers["WWW-Authenticate"] = r'Basic realm="Secure Area"'
-            return resp, 401
-def get_http_passwd():
-    pw = request.headers["Authorization"]
-    return base64.b64decode(pw[6:]).decode("utf8", "ignore").split(":")
-
-
+            return res
+        if pw.startswith("Bearer"):
+            if not secret:
+                raise AttributeError("jwt authorization require a secret")
+            res=chk_jwt(pw[7:],secret)
+            return res
+    else:
+        raise KeyError()
+def get_passwd():
+    try:
+        pw = request.headers["Authorization"]
+        if pw.startswith("Basic"):
+            return base64.b64decode(pw[6:]).decode("utf8", "ignore").split(":")
+        if pw.startswith("Bearer"):
+            payload=base64.b64decode(pw[6:].split(".")[1]).decode("utf8", "ignore")
+            payload=json.loads(payload)
+            return payload["username"],""
+    except (KeyError,base64.binascii.Error):
+        raise ValueError()
+    raise ValueError()
 class log:
     @staticmethod
     def box_message(txt):

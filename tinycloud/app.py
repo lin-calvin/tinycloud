@@ -51,7 +51,7 @@ class Tinycloud(Flask):
             self.acl = acl.acl(os.path.join(confdir,"acl.yaml"))
         
         self.vfs = vfs.fs(mod_manger=self.mm)
-        self.dav = dav.Dav(fs=self.vfs,auth=self.auth,acl=self.acl)
+        self.dav = dav.Dav(fs=self.vfs,auth=self.auth,acl=self.acl,secret=self.conf["secret"])
         for _fs in self.conf["storages"]:
             self.mm.load_mod(_fs["type"])
             opts = copy.copy(_fs)
@@ -59,23 +59,35 @@ class Tinycloud(Flask):
             opts.pop("name")
             self.vfs.mount(getattr(self.mm,_fs["type"]), _fs["name"], opts)
         
-        self.shares=share.Share(fs=self.vfs,auth=self.auth)
+        self.shares=share.Share(fs=self.vfs,auth=self.auth,secret=self.conf["secret"])
         
         self.register_blueprint(self.dav.api)
         self.register_blueprint(self.shares.api)
         
         self.add_url_rule("/", view_func=self.main_page)
         self.add_url_rule("/api/confmgr",view_func=self.confmgr, methods=["GET","POST"])
+        self.add_url_rule("/api/login",view_func=self.login,methods=["POST"])
         self.after_request(self.hook_request)
     def main_page(self):
-        res=utils.chk_auth(self.auth)
-        if res:
-            return res
+#        res=utils.chk_auth(self.auth,secret=self.conf['secret'])
+#        if not res:
+#            return "",403
         try:
             return send_file("static/index.html")
         except FileNotFoundError:
             return 'Frontend file dosn\'t installd'
-    def hook_request(self,response):
+    
+    def login(self):
+        try:
+            username,password=utils.get_passwd()
+        except ValueError:
+            return {"status":403},403
+        res=self.auth.do_auth(username,password)
+        if not res:
+            return {"status":403},403
+        token=utils.generate_jwt({"username":username},self.conf["secret"])
+        return {"status":200,"token":token}
+    def  hook_request(self,response):
         response.headers['Server']="Tinycloud"
         return response
 def main():

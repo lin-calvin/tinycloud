@@ -8,7 +8,7 @@ import os
 
 
 class Dav:
-    def __init__(self,fs,acl=None,auth=None,blueprint=True):
+    def __init__(self,fs,acl=None,auth=None,blueprint=True,secret=None):
         if blueprint:
             self.api=Blueprint('dav', __name__, url_prefix='/dav')
             self.api.add_url_rule(
@@ -25,16 +25,22 @@ class Dav:
         self.auth = auth
         self.acl = acl
         self.fs = fs
+        self.secret=secret
         self.__name__ = ""
     def __call__(self, path=""):
         path = os.path.normpath("/" + path)
         if ".." in path:
             return "", 400
         if self.auth:
-            res=utils.chk_auth(self.auth)
-            if res:
-                return res
-            utils.fs_context.username=utils.get_http_passwd()[0]
+            try:
+                res=utils.chk_auth(self.auth,secret=self.secret)
+                if not res:
+                    return "",403
+            except KeyError:
+                    resp = make_response("")
+                    resp.headers["WWW-Authenticate"] = r'Basic realm=""'
+                    return resp, 401
+            utils.fs_context.username=utils.get_passwd()[0]
         else:
             if not utils.fs_context.username:
                 utils.fs_context.username = None

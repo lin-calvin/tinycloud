@@ -10,14 +10,19 @@ import dav
 
 
 class Share:
-    def __init__(self, fs, auth=None):
+    def __init__(self, fs, auth=None,secret=None):
         self.fs = fs
         self.auth = auth
+        self.secret=secret
         self.shares = {}
         self.api = Blueprint("share", __name__, url_prefix="/")
         self.dav = dav.Dav(self.fs, blueprint=False)
         self.api.add_url_rule('/api/shares/new',
                               view_func=self.make_share_view,
+                              methods=["POST"]
+                              )
+        self.api.add_url_rule('/api/shares/del',
+                              view_func=self.del_share_view,
                               methods=["POST"]
                               )
         self.api.add_url_rule(
@@ -30,6 +35,10 @@ class Share:
                             view_func=self.share_info,
         )
         self.api.add_url_rule(
+                            "/api/shares/",
+                            view_func=self.all_shares,
+        )
+        self.api.add_url_rule(
                             "/shares/<path:path>",
                             view_func=self.view_share,
         )
@@ -38,10 +47,19 @@ class Share:
         idt = hashlib.sha512((json.dumps(data) + str(random.random())).encode()).hexdigest()[:10]
         self.shares[idt] = data
         return idt
-
+    def do_del_share(self,idt):
+        del self.shares[idt]
+    def del_share_view(self):
+        if not utils.chk_auth(auth,self.secret):
+            return {"error": 403}, 403
+        id = request.json['id']
+        try:
+            self.do_del_share(id)
+            return {"res":"ok"},200
+        except KeyError:
+            return {"res":"err","error":404},404
     def make_share_view(self):
-        username, passwd = utils.get_http_passwd()
-        if not self.auth.do_auth(username, passwd):
+        if not utils.chk_auth(auth,self.secret):
             return {"error": 403}, 403
         req = request.json
         path = req['path']
@@ -49,7 +67,7 @@ class Share:
 
         if 'mode'  in req:
              args['mode']=req['mode']
-        res = {'id': self.do_make_share(**args)}
+        res = {"res":"ok",'id': self.do_make_share(**args)}
         return res
 
     def share_dav(self, path):
@@ -66,6 +84,8 @@ class Share:
     def share_info(self,idt):
         return self.shares[idt]
     def view_share(self,path):
-        if path.split('/') in self.shares:
+        if path.split('/')[0] in self.shares:
             return send_file("static/share.html")
         return 'Not such share',404
+    def all_shares(self):
+        return self.shares
