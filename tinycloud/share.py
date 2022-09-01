@@ -59,11 +59,11 @@ class Share:
         except KeyError:
             return {"res":"err","error":404},404
     def make_share_view(self):
-        if not utils.chk_auth(auth,self.secret):
+        if not utils.chk_auth(self.auth,self.secret):
             return {"error": 403}, 403
-        req = request.json
+        req=json.loads(request.data.decode())
         path = req['path']
-        args={'path':path,'username':username}
+        args={'path':path,'username':utils.get_passwd()[0]}
 
         if 'mode'  in req:
              args['mode']=req['mode']
@@ -76,7 +76,6 @@ class Share:
         path=os.path.join(info['path'], "/".join(p[1:]))
         utils.fs_context.username=info['username']
 
-        print(info)
         #return self.dav(os.path.join(self.shares[str(p[0])], "/".join(p[1:])))
         if info['mode']=='r' and request.method in ['PUT','DELETE','MKCOL']:
             return "",403
