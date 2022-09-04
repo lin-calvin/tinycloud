@@ -6,6 +6,8 @@ from flask import request,make_response
 import base64
 import yaml
 import hmac
+import random
+import string
 
 def calc_size(size: str):
     """
@@ -35,23 +37,21 @@ def time_as_rfc(timestamp: int):
     """
     return email.utils.format_datetime(datetime.datetime.fromtimestamp(timestamp))
 def chk_auth(auth,secret=None):
+    res=False
     if "Authorization" in request.headers:
         pw = request.headers["Authorization"]
         if pw.startswith("Basic"):
             username, password = (
                 base64.b64decode(pw[6:]).decode("utf8", "ignore").split(":")
             )
-            res = auth.do_auth(username, password)
-            return res
+            res = res|auth.do_auth(username, password)
         if pw.startswith("Bearer"):
             if not secret:
                 raise AttributeError("jwt authorization require a secret")
-            res=chk_jwt(pw[7:],secret)
-            return res
-    if request.cookies['token']:
-        return chk_jwt(request.cookies['token'],secret)
-
-    raise KeyError()
+            res=res|chk_jwt(pw[7:],secret)
+    if request.cookies.get("token"):
+        res=res|chk_jwt(request.cookies['token'],secret)
+    return res
 def get_passwd():
     if 1:#try:
         if "Authorization" in request.headers:
@@ -62,7 +62,7 @@ def get_passwd():
                 payload=base64.b64decode(pw[6:].split(".")[1]).decode("utf8", "ignore")
                 payload=json.loads(payload)
                 return payload["username"],""
-        if request.cookies["token"]:
+        if request.cookies.get("token"):
             token=request.cookies["token"]
             payload=base64.b64decode(token[6:].split(".")[1]).decode("utf8", "ignore")
             payload=json.loads(payload)
@@ -89,6 +89,8 @@ def load_conf(path):
 def save_conf(conf,file_name):
     file=open(file_name,"w")
     yaml.dump(conf,file)
+def random_string(length):
+    return ''.join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in range(length))
 
 
 fs_context=type.__new__(type,'fs_context',(),{'username':str()})()

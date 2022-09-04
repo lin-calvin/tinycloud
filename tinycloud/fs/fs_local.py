@@ -1,3 +1,4 @@
+
 import os
 import time
 from utils import *
@@ -16,7 +17,7 @@ class fs:
             for file in os.listdir(path):
                 try:
                     ftype = ["file", "dir"][int(os.path.isdir(path + "/" + file))]
-                    fsize = os.path.getsize(path + "/" + file)
+                    fsize = os.path.getsize(os.path.join(path ,file))
                     ftime = time_as_rfc(os.stat(path + "/" + file).st_ctime)
                 except:
                     ftype = "broken"
@@ -36,11 +37,10 @@ class fs:
             # res.append({"type":ftype,"name":path,"path":path+"/"})
         else:
             file = path
-            fsize = os.path.getsize(file)
-            ftype = ["file", "dir"][int(os.path.isdir(file))]
+            ftype = ["file", "dir"][int(os.path.isdir(os.path.join(self.path ,file)))]
             fname = file.split("/")[-1]
-            fsize = os.path.getsize(path + "/" + file)
-            ftime = time_as_rfc(os.stat(file).st_ctime)
+            fsize = os.path.getsize(self.path + "/" + file)
+            ftime = time_as_rfc(os.stat(self.path + "/" + file).st_ctime)
             res.append(
                 {
                     "type": ftype,
@@ -84,3 +84,4 @@ class fs:
     def mkdir(self, path):
         os.mkdir(os.path.join(self.path , path))
         return "OK"
+PROVIDE={"fs":fs}

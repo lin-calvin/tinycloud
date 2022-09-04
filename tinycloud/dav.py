@@ -37,9 +37,7 @@ class Dav:
                 if not res:
                     return "",403
             except KeyError:
-                    resp = make_response("")
-                    resp.headers["WWW-Authenticate"] = r'Basic realm=""'
-                    return resp, 401
+                    return "", 403
             utils.fs_context.username=utils.get_passwd()[0]
         else:
             if not utils.fs_context.username:
@@ -48,36 +46,43 @@ class Dav:
             res = self.acl.check(path, utils.fs_context.username)
             if not res:
                 return "", 403
-        if request.method == "PROPFIND":  # 返回目录下的文件
-            ret = self.fs.list(path)
-            if type(ret) == int:
-                if ret == -1:
+        try:            
+            if request.method == "PROPFIND":  # 返回目录下的文件
+                ret = self.fs.list(path)
+                if type(ret) == int:
+                    if ret == -1:
+                        return "", 404
+                if request.args.get("json_mode"):
+                    return {"files": ret}
+                return render_template("dav_respone", **{"files": ret}), 207
+            if request.method == "OPTIONS":  # 确定webdav支持
+                resp = make_response()
+                resp.headers["DAV"] = "1,2"
+                return resp
+            if request.method == "GET":
+                resp,length = self.fs.read(path)
+                if path == "":
+                    return ""
+                if resp == -1:
                     return "", 404
-            if request.args.get("json_mode"):
-                return {"files": ret}
-            return render_template("dav_respone", **{"files": ret}), 207
-
-        if request.method == "OPTIONS":  # 确定webdav支持
-            resp = make_response()
-            resp.headers["DAV"] = "1,2"
-            return resp
-        if request.method == "GET":
-            resp,length = self.fs.read(path)
-            if path == "":
+                resp=Response(resp, mimetype=mimetypes.guess_type(path)[0])
+                resp.content_length=length
+                return resp
+            if request.method == "PUT":
+                ret = self.fs.write(path, request.stream)
+                if type(ret) == int:
+                    return "", 404
                 return ""
-            if resp == -1:
-                return "", 404
-            resp=Response(resp, mimetype=mimetypes.guess_type(path)[0])
-            resp.content_length=length
-            return resp
-        if request.method == "PUT":
-            ret = self.fs.write(path, request.stream)
-            if type(ret) == int:
-                return "", 404
-            return ""
-        if request.method == "DELETE":
-            self.fs.delete(path)
-            return ""
-        if request.method == "MKCOL":
-            self.fs.mkdir(path)
-            return ""
+            if request.method == "DELETE":
+                self.fs.delete(path)
+                return ""
+            if request.method == "MKCOL":
+                self.fs.mkdir(path)
+                return ""
+        except Exception as e:
+            e=type(e)
+            if e==PermissionError:
+                return "",403
+            if e==FileNotFoundError:
+                return "",404
+            return 400

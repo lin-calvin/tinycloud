@@ -34,14 +34,14 @@ class Tinycloud(Flask):
     def __init__(self, confdir):
         super().__init__(__name__)
 
-        self.mm = mod_manger.mod_manger()
+        self.mm = mod_manger.mod_manger(self)
 
         self.conf=utils.load_conf(os.path.join(confdir + "/config.yaml"))
 
         auth_type = self.conf["auth"]["type"]
         if auth_type != None:
             self.mm.load_mod(auth_type)
-            self.auth = getattr(self.mm, auth_type).auth()
+            self.auth = self.mm.require_mod(auth_type,"auth")()
         else:
             self.auth = None
 
@@ -57,7 +57,8 @@ class Tinycloud(Flask):
             opts = copy.copy(_fs)
             opts.pop("type")
             opts.pop("name")
-            self.vfs.mount(getattr(self.mm,_fs["type"]), _fs["name"], opts)
+            fs=self.mm.require_mod(_fs["type"],"fs")
+            self.vfs.mount(fs, _fs["name"], opts)
         
         self.shares=share.Share(fs=self.vfs,auth=self.auth,secret=self.conf["secret"])
         
@@ -69,14 +70,18 @@ class Tinycloud(Flask):
         self.add_url_rule("/api/login",view_func=self.login,methods=["POST"])
         self.after_request(self.hook_request)
     def main_page(self):
-#        res=utils.chk_auth(self.auth,secret=self.conf['secret'])
-#        if not res:
-#            return "",403
         try:
-            return send_file("static/index.html")
+            with open("static/index.html") as file:
+                data=file.read()
         except FileNotFoundError:
-            return 'Frontend file dosn\'t installd'
-    
+            return 'Frontend file dosn\'t installed'
+        try:
+            res=utils.chk_auth(self.auth,secret=self.conf['secret'])
+        except KeyError:
+            res=False
+        if not res:
+            data=data.replace("</head>",r'<script>window.tcNeedLogin=true</script></head>')
+        return data
     def login(self):
         try:
             username,password=utils.get_passwd()
@@ -112,10 +117,12 @@ def main():
             tc.conf["http"]["addr"], tc.conf["http"]["port"]
         )
     )
-    WSGIServer(
-        (tc.conf["http"]["addr"], tc.conf["http"]["port"]), tc, log=logging
-    ).serve_forever()
-
+    try:
+        WSGIServer(
+            (tc.conf["http"]["addr"], tc.conf["http"]["port"]), tc
+        ).serve_forever()
+    except KeyboardInterrupt:
+        sys.exit()
 
 if __name__ == "__main__":
     main()

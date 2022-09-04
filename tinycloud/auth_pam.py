@@ -1,3 +1,4 @@
+
 import pam
 import os
 import utils
@@ -15,3 +16,4 @@ class auth:
         if user=="" or passwd=="":
             return False
         return pam.authenticate(user,passwd)
+PROVIDE={"auth":auth}

@@ -1,3 +1,4 @@
+
 import pam
 import os
 import utils
@@ -5,4 +6,5 @@ import utils
 
 class auth:
     def do_auth(self, user, passwd):
-        return True
+        return Truei
+PROVIDE={"auth":auth}

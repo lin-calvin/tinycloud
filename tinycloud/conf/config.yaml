@@ -4,5 +4,10 @@ http:
   addr: 0.0.0.0
   port: 8988
 storages:
+  - name: a
+    type: fs.fs_local
+    path: /home/calvin/test
   - name: <root>
-    type: fs.fs_syshome
+    type: fs.fs_local
+    path: /
+secret: vfdkebgskjbreijogtfgtjefgtrk

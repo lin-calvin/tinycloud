@@ -1,3 +1,4 @@
+
 import os
 import shutil
 import time
@@ -112,3 +113,4 @@ class fs:
             return -1
         os.mkdir(os.path.join(home , path))
         return "OK"
+PROVIDE={"fs":fs}
