@@ -1,7 +1,10 @@
 __pycache__/
 .venv/
 *.swp
+*.save
 dist/
+build
+tinycloud.egg-info/
 tinycloud/static/
 tinycloud/conf
 
