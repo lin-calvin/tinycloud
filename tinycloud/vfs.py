@@ -1,6 +1,7 @@
 import os
 import logging
 
+
 class fs:
     def __init__(self, mod_manger):
         self.mm = mod_manger
@@ -10,9 +11,10 @@ class fs:
         """
         mount(module,mount point,args for module)
         """
-        
+
         self.mount_table[path] = fs(**args)
-#        logging.info("Mount {} on {} success".format(module, path))
+
+    #        logging.info("Mount {} on {} success".format(module, path))
 
     def get_fs(self, path):
         for mount_point in self.mount_table:
@@ -25,13 +27,15 @@ class fs:
         if path == "/" or path == "":
             res = []
             for a in self.mount_table:
-                if a=="<root>":
-                    fs,_=self.get_fs("<root>")
-                    if fs==-1:
+                if a == "<root>":
+                    fs, _ = self.get_fs("<root>")
+                    if fs == -1:
                         continue
                     res.extend(fs.list("/"))
                 else:
-                    res.append({"type": "mountpoint", "name": a, "path": a, "size": 4000})
+                    res.append(
+                        {"type": "mountpoint", "name": a, "path": a, "size": 4000}
+                    )
             return res
         if path.startswith("/"):
             path = path[1:]

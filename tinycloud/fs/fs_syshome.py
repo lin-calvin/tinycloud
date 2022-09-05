@@ -1,4 +1,3 @@
-
 import os
 import shutil
 import time
@@ -7,20 +6,21 @@ from utils import *
 
 class fs:
     def __init__(self):
-        self.homes={}
-        with open('/etc/passwd') as passwd:
+        self.homes = {}
+        with open("/etc/passwd") as passwd:
             for i in passwd.readlines():
-                i=i.split(':')
-                self.homes[i[0]]=i[5]
-    def get_home(self,user):
+                i = i.split(":")
+                self.homes[i[0]] = i[5]
+
+    def get_home(self, user):
         if user in self.homes:
             return self.homes[user]
         return -1
 
     def list(self, path="/"):
         res = []
-        home=self.get_home(fs_context.username)
-        if home==-1:
+        home = self.get_home(fs_context.username)
+        if home == -1:
             return -1
         if not os.path.exists(home + "/" + path):
             return -1
@@ -67,31 +67,33 @@ class fs:
         return res
 
     def read(self, path, chunk_size="1M"):
-        home=self.get_home(fs_context.username)
-        if home==-1:
+        home = self.get_home(fs_context.username)
+        if home == -1:
             return -1
         chunk_size = calc_size(chunk_size)
-        if os.path.getsize(os.path.join(home, path))<chunk_size:
-            chunk_size=os.path.getsize(os.path.join(home, path))
+        if os.path.getsize(os.path.join(home, path)) < chunk_size:
+            chunk_size = os.path.getsize(os.path.join(home, path))
+
         def reader():
             while 1:
                 data = file.read(chunk_size)
                 if not data:
                     break
                 yield data
-        if os.path.isfile(os.path.join(home , path)):
-            file = open(os.path.join(home , path), "rb")
-            return reader(),os.path.getsize(os.path.join(home , path))
+
+        if os.path.isfile(os.path.join(home, path)):
+            file = open(os.path.join(home, path), "rb")
+            return reader(), os.path.getsize(os.path.join(home, path))
         else:
             return -1
 
     def write(self, path, stream, chunk_size="1M"):
-        home=self.get_home(fs_context.username)
-        if home==-1:
+        home = self.get_home(fs_context.username)
+        if home == -1:
             return -1
-        filename=os.path.join(home, path)
+        filename = os.path.join(home, path)
         file = open(filename, "wb")
-        shutil.chown(filename,user=fs_context.username)
+        shutil.chown(filename, user=fs_context.username)
         chunk_size = calc_size(chunk_size)
         while 1:
             data = stream.read(chunk_size)
@@ -101,16 +103,18 @@ class fs:
             file.write(data)
 
     def delete(self, path):
-        home=self.get_home(fs_context.username)
-        if home==-1:
+        home = self.get_home(fs_context.username)
+        if home == -1:
             return -1
-        os.remove(os.path.join(home , path))
+        os.remove(os.path.join(home, path))
         return "OK"
 
     def mkdir(self, path):
-        home=self.get_home(fs_context.username)
-        if home==-1:
+        home = self.get_home(fs_context.username)
+        if home == -1:
             return -1
-        os.mkdir(os.path.join(home , path))
+        os.mkdir(os.path.join(home, path))
         return "OK"
-PROVIDE={"fs":fs}
+
+
+PROVIDE = {"fs": fs}

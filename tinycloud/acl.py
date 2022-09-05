@@ -1,9 +1,8 @@
-
 import os
 import yaml
 
 class acl:
-    def __init__(self,conf):
+    def __init__(self, conf):
         aclfile = open(conf)
         self.acl = yaml.safe_load(aclfile.read())
 

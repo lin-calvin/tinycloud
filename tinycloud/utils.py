@@ -2,12 +2,13 @@ import email.utils
 import datetime
 import math
 import json
-from flask import request,make_response
+from flask import request, make_response
 import base64
 import yaml
 import hmac
 import random
 import string
+
 
 def calc_size(size: str):
     """
@@ -19,54 +20,71 @@ def calc_size(size: str):
     G = K * 1024
     return eval(str(int(size[:-1])) + "*" + size[-1])
 
-def generate_jwt(payload,secret):
-    payload=base64.b64encode(json.dumps(payload).encode()).decode()
-    header=base64.b64encode(r'{"typ":"JWT","alg":"HS256"}'.encode()).decode()
-    secret=hmac.new(secret.encode(),(".".join([header,payload])+secret).encode(),digestmod="SHA256").digest()
-    secret=base64.b64encode(secret).decode()
-    return ".".join([header,payload,secret])
-def chk_jwt(jwt,secret):
-    payload=base64.b64decode(jwt.split('.')[1]).decode()
-    i=generate_jwt(json.loads(payload),secret)
-    if i==jwt:
+
+def generate_jwt(payload, secret):
+    payload = base64.b64encode(json.dumps(payload).encode()).decode()
+    header = base64.b64encode(r'{"typ":"JWT","alg":"HS256"}'.encode()).decode()
+    secret = hmac.new(
+        secret.encode(),
+        (".".join([header, payload]) + secret).encode(),
+        digestmod="SHA256",
+    ).digest()
+    secret = base64.b64encode(secret).decode()
+    return ".".join([header, payload, secret])
+
+
+def chk_jwt(jwt, secret):
+    payload = base64.b64decode(jwt.split(".")[1]).decode()
+    i = generate_jwt(json.loads(payload), secret)
+    if i == jwt:
         return True
     return False
+
+
 def time_as_rfc(timestamp: int):
     """
     Convert timestamp to RFC2822 format
     """
     return email.utils.format_datetime(datetime.datetime.fromtimestamp(timestamp))
-def chk_auth(auth,secret=None):
-    res=False
+
+
+def chk_auth(auth, secret=None):
+    res = False
     if "Authorization" in request.headers:
         pw = request.headers["Authorization"]
         if pw.startswith("Basic"):
             username, password = (
                 base64.b64decode(pw[6:]).decode("utf8", "ignore").split(":")
             )
-            res = res|auth.do_auth(username, password)
+            res = res | auth.do_auth(username, password)
         if pw.startswith("Bearer"):
             if not secret:
                 raise AttributeError("jwt authorization require a secret")
-            res=res|chk_jwt(pw[7:],secret)
+            res = res | chk_jwt(pw[7:], secret)
     if request.cookies.get("token"):
-        res=res|chk_jwt(request.cookies['token'],secret)
+        res = res | chk_jwt(request.cookies["token"], secret)
     return res
+
+
 def get_passwd():
-    if 1:#try:
+    if 1:  # try:
         if "Authorization" in request.headers:
             pw = request.headers["Authorization"]
             if pw.startswith("Basic"):
                 return base64.b64decode(pw[6:]).decode("utf8", "ignore").split(":")
             if pw.startswith("Bearer"):
-                payload=base64.b64decode(pw[6:].split(".")[1]).decode("utf8", "ignore")
-                payload=json.loads(payload)
-                return payload["username"],""
+                payload = base64.b64decode(pw[6:].split(".")[1]).decode(
+                    "utf8", "ignore"
+                )
+                payload = json.loads(payload)
+                return payload["username"], ""
         if request.cookies.get("token"):
-            token=request.cookies["token"]
-            payload=base64.b64decode(token[6:].split(".")[1]).decode("utf8", "ignore")
-            payload=json.loads(payload)
-            return payload["username"],""
+            token = request.cookies["token"]
+            payload = base64.b64decode(token[6:].split(".")[1]).decode("utf8", "ignore")
+            payload = json.loads(payload)
+            return payload["username"], ""
+
+
 #    except (KeyError,base64.binascii.Error):
 #        raise ValueError()
 #    raise ValueError()
@@ -81,16 +99,24 @@ class log:
         print("#" + txt + "#")
         print("#" * (len(txt) + 2))
 
+
 def load_conf(path):
-    file = open(path,"r")
-    conf= yaml.safe_load(file.read())
+    file = open(path, "r")
+    conf = yaml.safe_load(file.read())
     file.close()
     return conf
-def save_conf(conf,file_name):
-    file=open(file_name,"w")
-    yaml.dump(conf,file)
+
+
+def save_conf(conf, file_name):
+    file = open(file_name, "w")
+    yaml.dump(conf, file)
+
+
 def random_string(length):
-    return ''.join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in range(length))
+    return "".join(
+        random.SystemRandom().choice(string.ascii_letters + string.digits)
+        for _ in range(length)
+    )
 
 
-fs_context=type.__new__(type,'fs_context',(),{'username':str()})()
+fs_context = type.__new__(type, "fs_context", (), {"username": str()})()
