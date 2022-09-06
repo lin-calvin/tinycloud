@@ -21,7 +21,12 @@ class Share:
             self.secret=TINYCLOUD.secret
         else:
             raise TypeError()
-        self.shares = {}
+        self.shares={}
+        if "TINYCLOUD" in globals():
+            TINYCLOUD.on_exit(self.on_exit)
+            if os.path.exists(TINYCLOUD.confdir+"/shares.json"):
+                with open(TINYCLOUD.confdir+"/shares.json","r") as dump:
+                    self.shares=json.load(dump)
         self.api = Blueprint("share", __name__, url_prefix="/")
         self.dav = dav.Dav(self.fs, blueprint=False)
         self.api.add_url_rule(
@@ -99,7 +104,9 @@ class Share:
         if path.split("/")[0] in self.shares:
             return send_file("static/share.html")
         return "Not such share", 404
-
+    def on_exit(self):
+        with open(TINYCLOUD.confdir+"/shares.json","w") as dump:
+            json.dump(self.shares,dump)
     def all_shares(self):
         return self.shares
 

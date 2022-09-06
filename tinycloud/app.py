@@ -1,5 +1,4 @@
 DEF_CONFIG = ["~/.config/tinycloud", "conf", "/etc/tinycloud"]
-
 import os, sys
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -9,6 +8,8 @@ import copy
 import base64
 import logging
 import logging.handlers
+import json
+import types
 
 from flask import Flask, redirect, url_for, send_file, request, make_response
 from flask.logging import default_handler
@@ -34,7 +35,9 @@ log = logging.handlers.SysLogHandler(address="/dev/log")
 class Tinycloud(Flask):
     def __init__(self, confdir):
         super().__init__(__name__)
+        self._on_exit=[]
         self.mm = mod_manger.mod_manger(self)
+        self.confdir=confdir
         self.conf = utils.load_conf(os.path.join(confdir + "/config.yaml"))
         self.secret=self.conf['secret']
         auth_type = self.conf["auth"]["type"]
@@ -70,23 +73,16 @@ class Tinycloud(Flask):
         self.add_url_rule(
             "/api/confmgr", view_func=self.confmgr, methods=["GET", "POST"]
         )
-        self.add_url_rule("/api/login", view_func=self.login, methods=["POST"])
+        self.add_url_rule("/api/auth/login", view_func=self.login, methods=["POST"])
+        self.add_url_rule("/api/auth/check", view_func=self.check_login, methods=["POST"])
         self.after_request(self.hook_request)
 
     def main_page(self):
         try:
-            with open("static/index.html") as file:
+            with open(os.path.dirname(os.path.abspath(__file__))+"/static/index.html") as file:
                 data = file.read()
         except FileNotFoundError:
             return "Frontend file dosn't installed"
-        try:
-            res = utils.chk_auth(self.auth, secret=self.conf["secret"])
-        except KeyError:
-            res = False
-        if not res:
-            data = data.replace(
-                "</head>", r"<script>window.tcNeedLogin=true</script></head>"
-            )
         return data
 
     def login(self):
@@ -99,12 +95,22 @@ class Tinycloud(Flask):
             return {"status": 403}, 403
         token = utils.generate_jwt({"username": username}, self.conf["secret"])
         return {"status": 200, "token": token}
-
+    def check_login(self):
+        token=json.loads(request.data.decode())['token']
+        if utils.chk_jwt(token,self.secret):
+            return {"status":200},200
+        return {"status":403},403
     def hook_request(self, response):
         response.headers["Server"] = "Tinycloud"
         return response
-
-
+    def on_exit(self,func):
+        if not hasattr(func,"__call__"):
+            raise TypeError("Func must be callable")
+        self._on_exit.append(func)
+    def exit(self):
+        for func in self._on_exit:
+            func()
+    
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config")
@@ -132,6 +138,7 @@ def main():
             (tc.conf["http"]["addr"], tc.conf["http"]["port"]), tc
         ).serve_forever()
     except KeyboardInterrupt:
+        tc.exit()
         sys.exit()
 
 
