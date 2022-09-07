@@ -2,7 +2,7 @@ import email.utils
 import datetime
 import math
 import json
-from flask import request, make_response
+from flask import request
 import base64
 import yaml
 import hmac

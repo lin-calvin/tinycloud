@@ -15,17 +15,17 @@ class fs:
     def get_home(self, user):
         if user in self.homes:
             return self.homes[user]
-        return -1
+        raise FileNotFoundError
+    def isdir(self,path):
+        home = self.get_home(fs_context.username)
+        path=os.path.join(home,path)
+        return os.path.isdir(path)
 
     def list(self, path="/"):
         res = []
         home = self.get_home(fs_context.username)
-        if home == -1:
-            return -1
-        if not os.path.exists(home + "/" + path):
-            return -1
+        real_path=home+"/"+path
         if os.path.isdir(home + "/" + path):
-            real_path = home + "/" + path
             for file in os.listdir(real_path):
                 fname = file
                 try:
@@ -53,7 +53,7 @@ class fs:
             fsize = os.path.getsize(file)
             ftype = ["file", "dir"][int(os.path.isdir(file))]
             fname = file.split("/")[-1]
-            fsize = os.path.getsize(path + "/" + file)
+            fsize = os.path.getsize(file)
             ftime = time_as_rfc(os.stat(file).st_ctime)
             res.append(
                 {
@@ -68,8 +68,6 @@ class fs:
 
     def read(self, path, chunk_size="1M"):
         home = self.get_home(fs_context.username)
-        if home == -1:
-            return -1
         chunk_size = calc_size(chunk_size)
         if os.path.getsize(os.path.join(home, path)) < chunk_size:
             chunk_size = os.path.getsize(os.path.join(home, path))

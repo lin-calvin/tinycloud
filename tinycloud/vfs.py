@@ -23,6 +23,12 @@ class fs:
                 return self.mount_table[p[0]], "/".join(p[1:])
         return self.mount_table["<root>"], "/".join(p)
 
+    def isdir(self, path):
+        if path=="/":
+            return True
+        fs, path = self.get_fs(path)
+        return fs.isdir(path)
+
     def list(self, path):
         if path == "/" or path == "":
             res = []

@@ -23,3 +23,6 @@ class mod_manger:
                 "{} dosn't provide {}".format(modname.title(), modtype)
             )
         return mod.PROVIDE[modtype]
+    def load_require(self,modname,modtype):
+        self.load_mod(modname)
+        return self.require_mod(modname,modtype)

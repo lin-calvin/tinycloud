@@ -11,7 +11,7 @@ import logging.handlers
 import json
 import types
 
-from flask import Flask, redirect, url_for, send_file, request, make_response
+from flask import Flask,  request
 from flask.logging import default_handler
 import argparse
 import faulthandler
@@ -27,7 +27,7 @@ import utils
 
 faulthandler.enable()
 
-log = logging.handlers.SysLogHandler(address="/dev/log")
+#log = logging.handlers.SysLogHandler(address="/dev/log")
 # logging.getLogger().addHandler(log)
 # logging.basicConfig(filename='/dev/stdout', level=logging.INFO)
 
@@ -95,18 +95,22 @@ class Tinycloud(Flask):
             return {"status": 403}, 403
         token = utils.generate_jwt({"username": username}, self.conf["secret"])
         return {"status": 200, "token": token}
+
     def check_login(self):
         token=json.loads(request.data.decode())['token']
         if utils.chk_jwt(token,self.secret):
             return {"status":200},200
         return {"status":403},403
+
     def hook_request(self, response):
         response.headers["Server"] = "Tinycloud"
         return response
+
     def on_exit(self,func):
         if not hasattr(func,"__call__"):
             raise TypeError("Func must be callable")
         self._on_exit.append(func)
+
     def exit(self):
         for func in self._on_exit:
             func()

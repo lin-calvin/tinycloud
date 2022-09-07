@@ -54,7 +54,8 @@ class Share:
         )
 
     def do_make_share(self, path, username=None, mode="r"):
-        data = {"path": path, "username": username, "mode": mode}
+        type=["file","dir"][self.fs.isdir(path)]
+        data = {"path": path, "username": username, "mode": mode, "type": type}
         idt = hashlib.sha512(
             (json.dumps(data) + str(random.random())).encode()
         ).hexdigest()[:10]
@@ -65,9 +66,9 @@ class Share:
         del self.shares[idt]
 
     def del_share_view(self):
-        if not utils.chk_auth(auth, self.secret):
+        if not utils.chk_auth(self.auth, TINYCLOUD.secret):
             return {"error": 403}, 403
-        id = request.json["id"]
+        id = json.loads(request.data.decode())['id']
         try:
             self.do_del_share(id)
             return {"res": "ok"}, 200
@@ -83,13 +84,18 @@ class Share:
 
         if "mode" in req:
             args["mode"] = req["mode"]
-        res = {"res": "ok", "id": self.do_make_share(**args)}
+        try:
+            res = {"res": "ok", "id": self.do_make_share(**args)}
+        except FileNotFoundError:
+            return {"error":"404"},404
         return res
 
     def share_dav(self, path):
         p = list(filter("".__ne__, path.split("/")))
         info = self.shares[p[0]]
-        path = os.path.join(info["path"], "/".join(p[1:]))
+        path = os.path.join(info["path"])
+        if info["type"]=="dir":
+            path=os.path.join(path, "/".join(p[1:]))
         utils.fs_context.username = info["username"]
 
         # return self.dav(os.path.join(self.shares[str(p[0])], "/".join(p[1:])))

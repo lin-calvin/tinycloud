@@ -5,23 +5,24 @@ import json
 import utils
 import mimetypes
 import os
+import traceback
 
-
+import utils
 class Dav:
-    def __init__(self, fs, acl=None, auth=None, blueprint=True, secret=None):
+    def __init__(self, fs, acl=None, auth=None, blueprint=True, secret=None,url_prefix="/dav"):
         if blueprint:
-            self.api = Blueprint("dav", __name__, url_prefix="/dav")
-            self.api.add_url_rule(
-                "/<path:path>",
-                methods=["GET", "PUT", "PROPFIND", "DELETE", "MKCOL"],
-                view_func=self,
-            )
+            self.api = Blueprint("dav", __name__, url_prefix=url_prefix)
             self.api.add_url_rule(
                 "/",
                 methods=["GET", "PUT", "PROPFIND", "DELETE", "MKCOL"],
                 view_func=self,
             )
-
+            self.api.add_url_rule(
+                "/<path:path>",
+                methods=["GET", "PUT", "PROPFIND", "DELETE", "MKCOL"],
+                view_func=self,
+            )
+        self.url_prefix=url_prefix
         self.auth = auth
         self.acl = acl
         self.fs = fs
@@ -50,12 +51,14 @@ class Dav:
         try:
             if request.method == "PROPFIND":  # 返回目录下的文件
                 ret = self.fs.list(path)
+                if self.fs.isdir(path):
+                    ret.append({"type": "dir","path": "/","time": 0,"name":""})
                 if type(ret) == int:
                     if ret == -1:
                         return "", 404
                 if request.args.get("json_mode"):
                     return {"files": ret}
-                return render_template("dav_respone", **{"files": ret}), 207
+                return render_template("dav_respone", **{"files": ret,"url_prefix":self.url_prefix,"normpath": os.path.normpath}), 207
             if request.method == "OPTIONS":  # 确定webdav支持
                 resp = make_response()
                 resp.headers["DAV"] = "1,2"
@@ -81,9 +84,10 @@ class Dav:
                 self.fs.mkdir(path)
                 return ""
         except Exception as e:
+            traceback.print_exc()
             e = type(e)
             if e == PermissionError:
                 return "", 403
             if e == FileNotFoundError:
                 return "", 404
-            return 400
+            return str(e),400

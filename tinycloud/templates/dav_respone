@@ -3,7 +3,7 @@
     xmlns:D="DAV:">
 	{% for file in files %}
             <D:response>
-                <D:href>{{ file["path"] }}</D:href>
+                <D:href>{{ normpath(url_prefix+"/"+file["path"]) }}</D:href>
                 <D:propstat>
                     <D:prop>
                     {% if  file["type"]=="file" %}
