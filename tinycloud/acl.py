@@ -1,5 +1,6 @@
 import yaml
 
+
 class acl:
     def __init__(self, conf):
         aclfile = open(conf)

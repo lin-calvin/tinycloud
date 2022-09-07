@@ -16,15 +16,16 @@ class fs:
         if user in self.homes:
             return self.homes[user]
         raise FileNotFoundError
-    def isdir(self,path):
+
+    def isdir(self, path):
         home = self.get_home(fs_context.username)
-        path=os.path.join(home,path)
+        path = os.path.join(home, path)
         return os.path.isdir(path)
 
     def list(self, path="/"):
         res = []
         home = self.get_home(fs_context.username)
-        real_path=home+"/"+path
+        real_path = home + "/" + path
         if os.path.isdir(home + "/" + path):
             for file in os.listdir(real_path):
                 fname = file

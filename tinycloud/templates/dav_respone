@@ -10,7 +10,7 @@
                         <D:getcontentlength>{{ file["size"] }}</D:getcontentlength>
                         <D:getcontenttype>application/octet-stream</D:getcontenttype>
                     {% else %}
-			 <D:resourcetype>
+    			 <D:resourcetype>
                              <D:collection
                                 xmlns:D="DAV:"/>
                             </D:resourcetype>          

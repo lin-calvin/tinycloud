@@ -24,7 +24,7 @@ class fs:
         return self.mount_table["<root>"], "/".join(p)
 
     def isdir(self, path):
-        if path=="/":
+        if path == "/":
             return True
         fs, path = self.get_fs(path)
         return fs.isdir(path)

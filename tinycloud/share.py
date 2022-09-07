@@ -8,25 +8,27 @@ from flask import Blueprint, request, send_file
 import utils
 import dav
 
-TINYCLOUD=None
+TINYCLOUD = None
+
+
 class Share:
     def __init__(self, fs=None, auth=None, secret=None):
-        if bool(fs)|bool(auth)|bool(secret):
+        if bool(fs) | bool(auth) | bool(secret):
             self.fs = fs
             self.auth = auth
             self.secret = secret
         elif "TINYCLOUD" in globals():
-            self.fs=TINYCLOUD.vfs
-            self.auth=TINYCLOUD.auth
-            self.secret=TINYCLOUD.secret
+            self.fs = TINYCLOUD.vfs
+            self.auth = TINYCLOUD.auth
+            self.secret = TINYCLOUD.secret
         else:
             raise TypeError()
-        self.shares={}
+        self.shares = {}
         if "TINYCLOUD" in globals():
             TINYCLOUD.on_exit(self.on_exit)
-            if os.path.exists(TINYCLOUD.confdir+"/shares.json"):
-                with open(TINYCLOUD.confdir+"/shares.json","r") as dump:
-                    self.shares=json.load(dump)
+            if os.path.exists(TINYCLOUD.confdir + "/shares.json"):
+                with open(TINYCLOUD.confdir + "/shares.json", "r") as dump:
+                    self.shares = json.load(dump)
         self.api = Blueprint("share", __name__, url_prefix="/")
         self.dav = dav.Dav(self.fs, blueprint=False)
         self.api.add_url_rule(
@@ -54,7 +56,7 @@ class Share:
         )
 
     def do_make_share(self, path, username=None, mode="r"):
-        type=["file","dir"][self.fs.isdir(path)]
+        type = ["file", "dir"][self.fs.isdir(path)]
         data = {"path": path, "username": username, "mode": mode, "type": type}
         idt = hashlib.sha512(
             (json.dumps(data) + str(random.random())).encode()
@@ -68,7 +70,7 @@ class Share:
     def del_share_view(self):
         if not utils.chk_auth(self.auth, TINYCLOUD.secret):
             return {"error": 403}, 403
-        id = json.loads(request.data.decode())['id']
+        id = json.loads(request.data.decode())["id"]
         try:
             self.do_del_share(id)
             return {"res": "ok"}, 200
@@ -87,15 +89,15 @@ class Share:
         try:
             res = {"res": "ok", "id": self.do_make_share(**args)}
         except FileNotFoundError:
-            return {"error":"404"},404
+            return {"error": "404"}, 404
         return res
 
     def share_dav(self, path):
         p = list(filter("".__ne__, path.split("/")))
         info = self.shares[p[0]]
         path = os.path.join(info["path"])
-        if info["type"]=="dir":
-            path=os.path.join(path, "/".join(p[1:]))
+        if info["type"] == "dir":
+            path = os.path.join(path, "/".join(p[1:]))
         utils.fs_context.username = info["username"]
 
         # return self.dav(os.path.join(self.shares[str(p[0])], "/".join(p[1:])))
@@ -110,10 +112,13 @@ class Share:
         if path.split("/")[0] in self.shares:
             return send_file("static/share.html")
         return "Not such share", 404
+
     def on_exit(self):
-        with open(TINYCLOUD.confdir+"/shares.json","w") as dump:
-            json.dump(self.shares,dump)
+        with open(TINYCLOUD.confdir + "/shares.json", "w") as dump:
+            json.dump(self.shares, dump)
+
     def all_shares(self):
         return self.shares
 
-PROVIDE={"api":lambda:Share().api}
+
+PROVIDE = {"api": lambda: Share().api}

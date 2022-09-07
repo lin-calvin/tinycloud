@@ -1,5 +1,5 @@
 class auth:
-    def do_auth(self, _,_):
+    def do_auth(self, _, _):
         return Truei
 
 

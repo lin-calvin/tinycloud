@@ -7,8 +7,9 @@ class fs:
     def __init__(self, path):
         self.path = path
 
-    def isdir(self,path):
-        return os.path.isdir(os.path.join(self.path,path))
+    def isdir(self, path):
+        return os.path.isdir(os.path.join(self.path, path))
+
     def list(self, path="/"):
         res = []
         if not os.path.exists(os.path.join(self.path, path)):
