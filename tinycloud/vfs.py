@@ -21,8 +21,9 @@ class fs:
             p = list(filter(("").__ne__, path.split("/")))
             if mount_point == p[0]:
                 return self.mount_table[p[0]], "/".join(p[1:])
-        return self.mount_table["<root>"], "/".join(p)
-
+        if "<root>" in self.mount_table:
+            return self.mount_table["<root>"], "/".join(p)
+        raise FileNotFoundError
     def isdir(self, path):
         if path == "/":
             return True

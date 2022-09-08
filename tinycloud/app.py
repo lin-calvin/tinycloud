@@ -1,4 +1,4 @@
-DEF_CONFIG = ["~/.config/tinycloud", "conf", "/etc/tinycloud"]
+DEF_CONFIG = ["/home/calvin/.config/tinycloud", "conf", "/etc/tinycloud"]
 import os
 import sys
 
@@ -124,8 +124,6 @@ def main():
     if args.config:
         conf_dir = args.config
     else:
-        conf_dir = "conf"
-    if not os.path.exists(conf_dir):
         for i in DEF_CONFIG:
             if os.path.exists(i):
                 conf_dir = i

@@ -62,13 +62,13 @@ class Dav:
         try:
             if request.method == "PROPFIND":  # 返回目录下的文件
                 ret = self.fs.list(path)
-                if self.fs.isdir(path):
-                    ret.append({"type": "dir", "path": "/", "time": 0, "name": ""})
                 if type(ret) == int:
                     if ret == -1:
                         return "", 404
                 if request.args.get("json_mode"):
                     return {"files": ret}
+                if self.fs.isdir(path):
+                    ret.append({"type": "dir", "path": path, "time":utils.time_as_rfc(0), "name": ""})
                 return (
                     render_template(
                         "dav_respone",
@@ -105,10 +105,10 @@ class Dav:
                 self.fs.mkdir(path)
                 return ""
         except Exception as e:
-            traceback.print_exc()
             e = type(e)
             if e == PermissionError:
                 return "", 403
             if e == FileNotFoundError:
                 return "", 404
+            traceback.print_exc()
             return str(e), 400

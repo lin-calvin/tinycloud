@@ -6,21 +6,18 @@ from utils import *
 class fs:
     def __init__(self, path):
         self.path = path
-
     def isdir(self, path):
         return os.path.isdir(os.path.join(self.path, path))
 
     def list(self, path="/"):
         res = []
-        if not os.path.exists(os.path.join(self.path, path)):
-            return -1
-        if os.path.isdir(os.path.join(self.path, path)):
-            path = os.path.join(self.path, path)
-            for file in os.listdir(path):
+        real_path=os.path.normpath(self.path +"/"+path)
+        if os.path.isdir(real_path):
+            for file in os.listdir(real_path):
                 try:
                     ftype = ["file", "dir"][int(os.path.isdir(path + "/" + file))]
-                    fsize = os.path.getsize(os.path.join(path, file))
-                    ftime = time_as_rfc(os.stat(path + "/" + file).st_ctime)
+                    fsize = os.path.getsize(os.path.join(real_path, file))
+                    ftime = time_as_rfc(os.stat(real_path + "/" + file).st_ctime)
                 except:
                     ftype = "broken"
                     fsize = 0
@@ -29,7 +26,7 @@ class fs:
                     {
                         "type": ftype,
                         "name": file,
-                        "path": path + "/" + file,
+                        "path": os.path.join(real_path,file),
                         "size": fsize,
                         "time": ftime,
                     }
@@ -38,22 +35,21 @@ class fs:
             # fsize=os.path.getsize(path+"/"+file)
             # res.append({"type":ftype,"name":path,"path":path+"/"})
         else:
-            file = path
-            ftype = ["file", "dir"][int(os.path.isdir(os.path.join(self.path, file)))]
+            file = real_path
+            ftype = ["file", "dir"][int(os.path.isdir(file))]
             fname = file.split("/")[-1]
-            fsize = os.path.getsize(self.path + "/" + file)
-            ftime = time_as_rfc(os.stat(self.path + "/" + file).st_ctime)
+            fsize = os.path.getsize(real_path)
+            ftime = time_as_rfc(os.stat(real_path).st_ctime)
             res.append(
                 {
                     "type": ftype,
                     "name": fname,
-                    "path": fname,
+                    "path": path,
                     "size": fsize,
                     "time": ftime,
                 }
             )
         return res
-
     def read(self, path, chunk_size="1M"):
         chunk_size = calc_size(chunk_size)
         if os.path.getsize(os.path.join(self.path, path)) < chunk_size:

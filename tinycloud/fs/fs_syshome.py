@@ -41,7 +41,7 @@ class fs:
                     {
                         "type": ftype,
                         "name": fname,
-                        "path": path + "/" + file,
+                        "path": os.path.join(path,fname),
                         "size": fsize,
                         "time": ftime,
                     }
@@ -60,7 +60,7 @@ class fs:
                 {
                     "type": ftype,
                     "name": fname,
-                    "path": fname,
+                    "path": path,
                     "size": fsize,
                     "time": ftime,
                 }
