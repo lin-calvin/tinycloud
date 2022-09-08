@@ -8,7 +8,7 @@
                     <D:prop>
                     {% if  file["type"]=="file" %}
                         <D:getcontentlength>{{ file["size"] }}</D:getcontentlength>
-                        <D:getcontenttype>application/octet-stream</D:getcontenttype>
+                        <D:getcontenttype>{{guess_type(file["name"])[0] or "application/octet-stream"}}</D:getcontenttype>
                     {% else %}
     			 <D:resourcetype>
                              <D:collection

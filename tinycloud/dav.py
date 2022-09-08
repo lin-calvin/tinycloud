@@ -9,7 +9,6 @@ import traceback
 
 import utils
 
-
 class Dav:
     def __init__(
         self, fs, acl=None, auth=None, blueprint=True, secret=None, url_prefix="/dav"
@@ -76,6 +75,7 @@ class Dav:
                             "files": ret,
                             "url_prefix": self.url_prefix,
                             "normpath": os.path.normpath,
+                            "guess_type": mimetypes.guess_type
                         }
                     ),
                     207,
