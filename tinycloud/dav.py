@@ -15,21 +15,12 @@ class Dav:
     ):
         if blueprint:
             self.api = Blueprint("dav", __name__, url_prefix=url_prefix)
-            self.api.add_url_rule(
-                "",
-                methods=["GET", "PUT", "PROPFIND", "DELETE", "MKCOL", "OPTIONS"],
-                view_func=self,
-            )
-            self.api.add_url_rule(
-                "/",
-                methods=["GET", "PUT", "PROPFIND", "DELETE", "MKCOL", "OPTIONS"],
-                view_func=self,
-            )
-            self.api.add_url_rule(
-                "/<path:path>",
-                methods=["GET", "PUT", "PROPFIND", "DELETE", "MKCOL", "OPTIONS"],
-                view_func=self,
-            )
+            for route in ["","/","/<path:path>"]:
+                self.api.add_url_rule(
+                    route,
+                    methods=["GET", "PUT", "PROPFIND", "DELETE", "MKCOL", "OPTIONS"],
+                    view_func=self,
+                )
         self.url_prefix = url_prefix
         self.auth = auth
         self.acl = acl
@@ -37,7 +28,7 @@ class Dav:
         self.secret = secret
         self.__name__ = ""
 
-    def __call__(self, path=""):
+    def __call__(self, path="",url_prefix_override=None):
         path = os.path.normpath("/" + path)
         if ".." in path:
             return "", 400
@@ -46,7 +37,7 @@ class Dav:
                 res = utils.chk_auth(self.auth, secret=self.secret)
                 if not res:
                     return Response(
-                        "", 401, {"WWW-Authenticate": 'Basic realm="Login Required"'}
+                        "", 401, {"WWW-Authenticate": 'Basic realm="Tinycloud"'}
                     )
             except KeyError:
                 return "", 403
@@ -73,7 +64,7 @@ class Dav:
                         "dav_respone",
                         **{
                             "files": ret,
-                            "url_prefix": self.url_prefix,
+                            "url_prefix": url_prefix_override or self.url_prefix,
                             "normpath": os.path.normpath,
                             "guess_type": mimetypes.guess_type
                         }
@@ -88,15 +79,11 @@ class Dav:
                 resp, length = self.fs.read(path)
                 if path == "":
                     return ""
-                if resp == -1:
-                    return "", 404
                 resp = Response(resp, mimetype=mimetypes.guess_type(path)[0])
                 resp.content_length = length
                 return resp
             if request.method == "PUT":
                 ret = self.fs.write(path, request.stream)
-                if type(ret) == int:
-                    return "", 404
                 return ""
             if request.method == "DELETE":
                 self.fs.delete(path)
@@ -111,4 +98,4 @@ class Dav:
             if e == FileNotFoundError:
                 return "", 404
             traceback.print_exc()
-            return str(e), 400
+            return str(e), 500

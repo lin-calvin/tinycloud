@@ -35,8 +35,9 @@ class fs:
             res = []
             for a in self.mount_table:
                 if a == "<root>":
-                    fs, _ = self.get_fs("<root>")
-                    if fs == -1:
+                    try:
+                        fs, _ = self.get_fs("<root>")
+                    except FileNotFoundError:
                         continue
                     res.extend(fs.list("/"))
                 else:
@@ -47,30 +48,20 @@ class fs:
         if path.startswith("/"):
             path = path[1:]
         fs, p = self.get_fs(path)
-        if fs == -1:
-            return -1
         return fs.list(p)
 
     def read(self, path):
         fs, path = self.get_fs(path)
-        if fs == -1:
-            return -1
         return fs.read(path)
 
     def mkdir(self, path):
         fs, path = self.get_fs(path)
-        if fs == -1:
-            return -1
         return fs.mkdir(path)
 
     def write(self, path, data):
         fs, path = self.get_fs(path)
-        if fs == -1:
-            return -1
         return fs.write(path, data)
 
     def delete(self, path):
         fs, path = self.get_fs(path)
-        if fs == -1:
-            return -1
         return fs.delete(path)
