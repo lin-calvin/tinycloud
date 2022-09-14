@@ -6,6 +6,7 @@ import logging
 
 
 class auth:
+    # pylint:disable=R0903
     def __init__(self):
         if os.uname().sysname != "Linux":
             raise RuntimeError("auth_pam only work on linux")

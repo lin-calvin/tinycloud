@@ -1,18 +1,19 @@
+# pylint:disable=wrong-import-position
 DEF_CONFIG = ["/home/calvin/.config/tinycloud", "conf", "/etc/tinycloud"]
 import os
 import sys
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-import os
 import copy
 import logging
 import logging.handlers
 import json
 import signal
-from flask import Flask, request
 import argparse
 import faulthandler
+from flask import Flask, request
+
 from gevent.pywsgi import WSGIServer
 
 import dav
@@ -30,6 +31,10 @@ faulthandler.enable()
 
 
 class Tinycloud(Flask):
+    """
+    Main class of Tinycloud
+    """
+
     def __init__(self, confdir):
         super().__init__(__name__)
         self._on_exit = []
@@ -38,7 +43,7 @@ class Tinycloud(Flask):
         self.conf = utils.load_conf(os.path.join(confdir + "/config.yaml"))
         self.secret = self.conf["secret"]
         auth_type = self.conf["auth"]["type"]
-        if auth_type != None:
+        if auth_type is not None:
             self.mm.load_mod(auth_type)
             self.auth = self.mm.require_mod(auth_type, "auth")()
         else:
@@ -49,17 +54,11 @@ class Tinycloud(Flask):
         if os.path.exists(os.path.join(confdir, "acl.yaml")):
             self.acl = acl.acl(os.path.join(confdir, "acl.yaml"))
 
-        self.vfs = vfs.fs(mod_manger=self.mm)
+        self.vfs = vfs.fs()
         self.dav = dav.Dav(
             fs=self.vfs, auth=self.auth, acl=self.acl, secret=self.secret
         )
-        for _fs in self.conf["storages"]:
-            self.mm.load_mod(_fs["type"])
-            opts = copy.copy(_fs)
-            opts.pop("type")
-            opts.pop("name")
-            fs = self.mm.require_mod(_fs["type"], "fs")
-            self.vfs.mount(fs, _fs["name"], opts)
+        self.mount_fs(self.conf["storages"])
         self.mm.load_mod("share")
         share_api = self.mm.require_mod("share", "api")()
         self.register_blueprint(share_api)
@@ -74,13 +73,21 @@ class Tinycloud(Flask):
         self.add_url_rule(
             "/api/auth/check", view_func=self.check_login, methods=["POST"]
         )
+
         self.after_request(self.hook_request)
+
+    def mount_fs(self, storages):
+        for _fs in storages:
+            self.mm.load_mod(_fs["type"])
+            opts = copy.copy(_fs)
+            opts.pop("type")
+            opts.pop("name")
+            fs = self.mm.require_mod(_fs["type"], "fs")
+            self.vfs.mount(fs, _fs["name"], opts)
 
     def main_page(self):
         try:
-            with open(
-                os.path.dirname(os.path.abspath(__file__)) + "/static/index.html"
-            ) as file:
+            with open(os.path.dirname(__file__) + "/static/index.html") as file:
                 data = file.read()
         except FileNotFoundError:
             return "Frontend file dosn't installed"

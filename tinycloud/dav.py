@@ -1,4 +1,3 @@
-from flask import render_template, request, make_response, Response, Blueprint
 import errno
 import base64
 import json
@@ -7,15 +6,22 @@ import mimetypes
 import os
 import traceback
 
+from flask import render_template, request, make_response, Response, Blueprint
+
 import utils
 
+
 class Dav:
+    """
+    The WebDav implementation
+    """
+
     def __init__(
         self, fs, acl=None, auth=None, blueprint=True, secret=None, url_prefix="/dav"
     ):
         if blueprint:
             self.api = Blueprint("dav", __name__, url_prefix=url_prefix)
-            for route in ["","/","/<path:path>"]:
+            for route in ["", "/", "/<path:path>"]:
                 self.api.add_url_rule(
                     route,
                     methods=["GET", "PUT", "PROPFIND", "DELETE", "MKCOL", "OPTIONS"],
@@ -28,7 +34,7 @@ class Dav:
         self.secret = secret
         self.__name__ = ""
 
-    def __call__(self, path="",url_prefix_override=None):
+    def __call__(self, path="", url_prefix_override=None):
         path = os.path.normpath("/" + path)
         if ".." in path:
             return "", 400
@@ -58,7 +64,14 @@ class Dav:
                 if request.args.get("json_mode"):
                     return {"files": ret}
                 if self.fs.isdir(path):
-                    ret.append({"type": "dir", "path": path, "time":utils.time_as_rfc(0), "name": ""})
+                    ret.append(
+                        {
+                            "type": "dir",
+                            "path": path,
+                            "time": utils.time_as_rfc(0),
+                            "name": "",
+                        }
+                    )
                 return (
                     render_template(
                         "dav_respone",
@@ -66,7 +79,7 @@ class Dav:
                             "files": ret,
                             "url_prefix": url_prefix_override or self.url_prefix,
                             "normpath": os.path.normpath,
-                            "guess_type": mimetypes.guess_type
+                            "guess_type": mimetypes.guess_type,
                         }
                     ),
                     207,

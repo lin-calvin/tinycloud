@@ -3,8 +3,11 @@ import logging
 
 
 class fs:
-    def __init__(self, mod_manger):
-        self.mm = mod_manger
+    """
+    Filesystem abstract layer
+    """
+
+    def __init__(self):
         self.mount_table = {}
 
     def mount(self, fs, path, args):
@@ -24,6 +27,7 @@ class fs:
         if "<root>" in self.mount_table:
             return self.mount_table["<root>"], "/".join(p)
         raise FileNotFoundError
+
     def isdir(self, path):
         if path == "/":
             return True

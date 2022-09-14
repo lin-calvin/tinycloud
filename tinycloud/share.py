@@ -39,7 +39,7 @@ class Share:
         )
         self.api.add_url_rule(
             "/api/shares/dav/<path:path>",
-            methods=["GET", "PUT", "PROPFIND", "DELETE", "MKCOL","OPTIONS"],
+            methods=["GET", "PUT", "PROPFIND", "DELETE", "MKCOL", "OPTIONS"],
             view_func=self.share_dav,
         )
         self.api.add_url_rule(
@@ -103,7 +103,7 @@ class Share:
         # return self.dav(os.path.join(self.shares[str(p[0])], "/".join(p[1:])))
         if info["mode"] == "r" and request.method in ["PUT", "DELETE", "MKCOL"]:
             return "", 403
-        return self.dav(path,url_prefix_override="/api/shares/dav/"+p[0])
+        return self.dav(path, url_prefix_override="/api/shares/dav/" + p[0])
 
     def share_info(self, idt):
         return self.shares[idt]
@@ -118,6 +118,8 @@ class Share:
             json.dump(self.shares, dump)
 
     def all_shares(self):
+        if not utils.chk_auth(self.auth, self.secret):
+            return {"err": 403}, 403
         return self.shares
 
 

@@ -14,14 +14,14 @@ def calc_size(size: str):
     """
     Claculate size from a string
     """
-    B = 1
-    K = 1024
-    M = K * 1024
-    G = K * 1024
-    return eval(str(int(size[:-1])) + "*" + size[-1])
+    units = {"B": 1, "K": 1024, "M": 1048576, "G": 1073741824}
+    return int(size[:1]) * units[size[-1]]
 
 
-def generate_jwt(payload, secret):
+def generate_jwt(payload: dict, secret: str):
+    """
+    Generate json web token
+    """
     payload = base64.b64encode(json.dumps(payload).encode()).decode()
     header = base64.b64encode(r'{"typ":"JWT","alg":"HS256"}'.encode()).decode()
     secret = hmac.new(
@@ -33,7 +33,10 @@ def generate_jwt(payload, secret):
     return ".".join([header, payload, secret])
 
 
-def chk_jwt(jwt, secret):
+def chk_jwt(jwt: str, secret: str):
+    """
+    Check if the jwt is valid
+    """
     payload = base64.b64decode(jwt.split(".")[1]).decode()
     i = generate_jwt(json.loads(payload), secret)
     if i == jwt:
@@ -49,6 +52,9 @@ def time_as_rfc(timestamp: int):
 
 
 def chk_auth(auth, secret=None):
+    """
+    Check if the credentials provides by clients is valid
+    """
     res = False
     if "Authorization" in request.headers:
         pw = request.headers["Authorization"]
@@ -67,6 +73,9 @@ def chk_auth(auth, secret=None):
 
 
 def get_passwd():
+    """
+    Get username and passwd from client
+    """
     if 1:  # try:
         if "Authorization" in request.headers:
             pw = request.headers["Authorization"]
@@ -88,16 +97,6 @@ def get_passwd():
 #    except (KeyError,base64.binascii.Error):
 #        raise ValueError()
 #    raise ValueError()
-class log:
-    @staticmethod
-    def box_message(txt):
-        if len(txt) < 15:
-            a = math.floor((15 - len(txt)) / 2)
-            a = " " * a
-            txt = a + txt + a
-        print("#" * (len(txt) + 2))
-        print("#" + txt + "#")
-        print("#" * (len(txt) + 2))
 
 
 def load_conf(path):

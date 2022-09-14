@@ -2,6 +2,7 @@ import yaml
 
 
 class acl:
+    # pylint:disable=R0903
     def __init__(self, conf):
         aclfile = open(conf)
         self.acl = yaml.safe_load(aclfile.read())

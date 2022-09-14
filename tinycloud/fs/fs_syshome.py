@@ -1,13 +1,13 @@
 import os
 import shutil
-import time
-from utils import *
+from utils import fs_context
 from . import fs_local
 
-class fs:
+
+class FsSyshome:
     def __init__(self):
         self.homes = {}
-        self.fs_local=fs_local.fs(path='/')
+        self.fs_local = fs_local.FsLocal(path="/")
         with open("/etc/passwd") as passwd:
             for i in passwd.readlines():
                 i = i.split(":")
@@ -24,36 +24,35 @@ class fs:
         return self.fs_local.isdir(path)
 
     def list(self, path="/"):
-        res = []
         home = self.get_home(fs_context.username)
         real_path = home + "/" + path
-        return self.fs_local.list(real_path)
+        res = []
+        for i in self.fs_local.list(real_path):
+            i["path"] = i["path"][len(home):]
+            res.append(i)
+        return res
+    def prop(self,path):
+        home = self.get_home(fs_context.username)
+        path = os.path.join(home, path)
+        return self.fs_local.prop(path)
     def read(self, path, chunk_size="1M"):
         home = self.get_home(fs_context.username)
-        real_path=os.path.join(home, path)
-        return self.fs_local.read(real_path,chunk_size)
+        real_path = os.path.join(home, path)
+        return self.fs_local.read(real_path, chunk_size)
+
     def write(self, path, stream, chunk_size="1M"):
         home = self.get_home(fs_context.username)
-        if home == -1:
-            return -1
         filename = os.path.join(home, path)
-        file = open(filename, "wb")
-        self.fs_local.write(filename,stream,chunk_size)
+        self.fs_local.write(filename, stream, chunk_size)
         shutil.chown(filename, user=fs_context.username)
 
     def delete(self, path):
         home = self.get_home(fs_context.username)
-        if home == -1:
-            return -1
         os.remove(os.path.join(home, path))
-        return "OK"
 
     def mkdir(self, path):
         home = self.get_home(fs_context.username)
-        if home == -1:
-            return -1
         os.mkdir(os.path.join(home, path))
-        return "OK"
 
 
-PROVIDE = {"fs": fs}
+PROVIDE = {"fs": FsSyshome}

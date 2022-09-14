@@ -1,6 +1,6 @@
 import os
 import sys
-  
+
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import os
@@ -8,7 +8,7 @@ import shutil
 import argparse
 import utils
 
-systemd_unit_file="""
+systemd_unit_file = """
 [Unit]
 Description=A lightweight personal stroage solution
 After=network.service
@@ -23,8 +23,8 @@ WantedBy=multi-user.target
 src_dir = os.path.join(os.path.dirname(__file__), "conf/")
 
 parser = argparse.ArgumentParser()
-parser.add_argument("config",help="path to install")
-parser.add_argument("--systemd",help="install systemd unit file",action="store_true")
+parser.add_argument("config", help="path to install")
+parser.add_argument("--systemd", help="install systemd unit file", action="store_true")
 args = parser.parse_args()
 if args.config:
     dst_dir = args.config
@@ -46,5 +46,5 @@ with open(os.path.join(dst_dir, "config.yaml"), "a") as config_file:
     config_file.write(secret)
 
 if args.systemd:
-    with open("/lib/systemd/system/tinycloud.service","w") as unit_file:
+    with open("/lib/systemd/system/tinycloud.service", "w") as unit_file:
         unit_file.write(systemd_unit_file)
