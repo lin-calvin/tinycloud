@@ -2,9 +2,6 @@
 DEF_CONFIG = ["/home/calvin/.config/tinycloud", "conf", "/etc/tinycloud"]
 import os
 import sys
-
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
 import copy
 import logging
 import logging.handlers
@@ -14,7 +11,6 @@ import argparse
 import faulthandler
 from flask import Flask, request
 
-from gevent.pywsgi import WSGIServer
 
 import dav
 import vfs
@@ -60,11 +56,10 @@ class Tinycloud(Flask):
         )
         self.mount_fs(self.conf["storages"])
         self.mm.load_mod("share")
-        share_api = self.mm.require_mod("share", "api")()
-        self.register_blueprint(share_api)
+
+        self.register_api("share")
 
         self.register_blueprint(self.dav.api)
-
         self.add_url_rule("/", view_func=self.main_page)
         self.add_url_rule(
             "/api/confmgr", view_func=self.confmgr, methods=["GET", "POST"]
@@ -85,6 +80,9 @@ class Tinycloud(Flask):
             fs = self.mm.require_mod(_fs["type"], "fs")
             self.vfs.mount(fs, _fs["name"], opts)
 
+    def register_api(self,mod):
+        api=self.mm.require_mod(mod,"api")()
+        self.register_blueprint(api)
     def main_page(self):
         try:
             with open(os.path.dirname(__file__) + "/static/index.html") as file:
@@ -124,41 +122,4 @@ class Tinycloud(Flask):
             func()
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--config")
-    args = parser.parse_args()
-    if args.config:
-        conf_dir = args.config
-    else:
-        for i in DEF_CONFIG:
-            if os.path.exists(i):
-                conf_dir = i
-                break
-    if not os.path.exists(conf_dir):
-        print(sys.argv[0] + ": " + conf_dir + ": No such file or directory")
-        exit(255)
-    tc = Tinycloud(conf_dir)
 
-    def on_exit(*_):
-        tc.exit()
-        sys.exit()
-
-    for sig in [signal.SIGTERM, signal.SIGINT]:
-        signal.signal(sig, on_exit)
-    print(
-        "Server is run at http://{}:{}".format(
-            tc.conf["http"]["addr"], tc.conf["http"]["port"]
-        )
-    )
-    try:
-        WSGIServer(
-            (tc.conf["http"]["addr"], tc.conf["http"]["port"]), tc
-        ).serve_forever()
-    except KeyboardInterrupt:
-        tc.exit()
-        sys.exit()
-
-
-if __name__ == "__main__":
-    main()

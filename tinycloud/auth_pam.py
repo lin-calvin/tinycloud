@@ -1,7 +1,7 @@
 import pam
 import os
 import utils
-from functools import cache
+from functools import lru_cache
 import logging
 
 
@@ -13,7 +13,7 @@ class auth:
         if os.getuid() != 0:
             logging.warning("Run as a non-root user,pam may not work")
 
-    @cache
+    @lru_cache
     def do_auth(self, user, passwd):
         if user == "" or passwd == "":
             return False
