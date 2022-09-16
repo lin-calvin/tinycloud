@@ -28,7 +28,7 @@ class AuthBuiltin:
             return False
         if password_hash(password)==auth[username]:
             return True
-
+        return False
 
 def adduser_cmd(args):
     username, password = args.username, args.password
