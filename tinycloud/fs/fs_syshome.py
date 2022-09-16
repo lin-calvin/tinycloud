@@ -28,13 +28,15 @@ class FsSyshome:
         real_path = home + "/" + path
         res = []
         for i in self.fs_local.list(real_path):
-            i["path"] = i["path"][len(home):]
+            i["path"] = i["path"][len(home) :]
             res.append(i)
         return res
-    def prop(self,path):
+
+    def prop(self, path):
         home = self.get_home(fs_context.username)
         path = os.path.join(home, path)
         return self.fs_local.prop(path)
+
     def read(self, path, chunk_size="1M"):
         home = self.get_home(fs_context.username)
         real_path = os.path.join(home, path)

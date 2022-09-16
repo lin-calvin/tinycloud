@@ -2,6 +2,8 @@ DEF_CONFIG = ["/home/calvin/.config/tinycloud", "conf", "/etc/tinycloud"]
 import argparse
 import os
 import sys
+from gevent.pywsgi import WSGIServer
+
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import signal
 from app import Tinycloud
@@ -44,6 +46,5 @@ def main():
 
 
 if __name__ == "__main__":
-    from gevent.pywsgi import WSGIServer
 
     main()

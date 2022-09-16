@@ -12,6 +12,8 @@ class mod_manger:
             raise exceptions.ModuleInvalidError("Not a valid module")
         mod.TINYCLOUD = self.tinycloud
         self.mods[name] = mod
+        if hasattr(mod, "init") and hasattr(mod.init, "__call__"):
+            mod.init()
 
     def require_mod(self, modname, modtype):
         if not modname in self.mods:

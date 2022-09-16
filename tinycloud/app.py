@@ -80,9 +80,10 @@ class Tinycloud(Flask):
             fs = self.mm.require_mod(_fs["type"], "fs")
             self.vfs.mount(fs, _fs["name"], opts)
 
-    def register_api(self,mod):
-        api=self.mm.require_mod(mod,"api")()
+    def register_api(self, mod):
+        api = self.mm.require_mod(mod, "api")()
         self.register_blueprint(api)
+
     def main_page(self):
         try:
             with open(os.path.dirname(__file__) + "/static/index.html") as file:
@@ -120,6 +121,3 @@ class Tinycloud(Flask):
     def exit(self):
         for func in self._on_exit:
             func()
-
-
-
