@@ -15,10 +15,12 @@ class mod_manger:
         if hasattr(mod, "init") and hasattr(mod.init, "__call__"):
             mod.init()
 
-    def require_mod(self, modname, modtype):
+    def require_mod(self, modname, modtype=None):
         if not modname in self.mods:
             raise ModuleNotFoundError("Module {} not found")
         mod = self.mods[modname]
+        if not modtype:
+            return mod
 
         if not modtype in mod.PROVIDE:
             raise ModuleNotFoundError(

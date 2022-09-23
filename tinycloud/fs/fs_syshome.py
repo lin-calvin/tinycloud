@@ -1,17 +1,34 @@
 import os
+import sys
 import shutil
 from utils import fs_context
 from . import fs_local
+import app
+
+TINYCLOUD: app.Tinycloud
 
 
 class FsSyshome:
     def __init__(self):
-        self.homes = {}
+        self.homes = self.get_homes()
         self.fs_local = fs_local.FsLocal(path="/")
-        with open("/etc/passwd") as passwd:
-            for i in passwd.readlines():
-                i = i.split(":")
-                self.homes[i[0]] = i[5]
+
+    def get_homes(self):
+        homes = {}
+        if (
+            os.uname().sysname == "Linux"
+            and type(TINYCLOUD.auth).__name__ != "AuthBuiltin"
+        ):
+            with open("/etc/passwd") as passwd:
+                for i in passwd.readlines():
+                    i = i.split(":")
+                    homes[i[0]] = i[5]
+        if type(TINYCLOUD.auth).__name__ == "AuthBuiltin":
+            users = TINYCLOUD.mm.require_mod("auth_builtin").auth
+            for i in users:
+                if "home" in users[i]:
+                    homes[i] = users[i]["home"]
+        return homes
 
     def get_home(self, user):
         if user in self.homes:

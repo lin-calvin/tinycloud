@@ -5,13 +5,18 @@ from functools import lru_cache
 import logging
 
 
-class auth:
+class AuthPam:
     # pylint:disable=R0903
     def __init__(self):
-        if os.uname().sysname != "Linux":
-            raise RuntimeError("auth_pam only work on linux")
+        if os.uname().sysname != "Windows":
+            raise RuntimeError("auth_pam only work on unix systems")
         if os.getuid() != 0:
-            logging.warning("Run as a non-root user,pam may not work")
+            username = os.getlogin()
+            logging.warning(
+                'Run as a non-root user,pam will only work with user "{}"'.format(
+                    username
+                )
+            )
 
     @lru_cache
     def do_auth(self, user, passwd):
@@ -20,4 +25,4 @@ class auth:
         return pam.authenticate(user, passwd)
 
 
-PROVIDE = {"auth": auth}
+PROVIDE = {"auth": AuthPam}
