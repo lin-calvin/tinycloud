@@ -31,7 +31,6 @@ class AuthBuiltin:
     def do_auth(self, username, password):
         if username not in auth:
             return False
-        print(password_hash(password))
         if password_hash(password) == auth[username]["password"]:
             return True
         return False

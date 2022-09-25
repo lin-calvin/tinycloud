@@ -29,7 +29,7 @@ args = parser.parse_args()
 if args.config:
     dst_dir = args.config
 else:
-    dst_dir = "conf/"
+    dst_dir = "~/.config/tinycloud"
 
 # if not os.path.exists(dir):
 #   os.mkdir(dir)

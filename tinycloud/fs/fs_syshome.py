@@ -1,7 +1,8 @@
 import os
+import platform
 import sys
 import shutil
-from utils import fs_context,time_as_rfc
+from utils import fs_context, time_as_rfc
 from . import fs_local
 import app
 
@@ -15,25 +16,27 @@ class FsSyshome:
 
     def get_homes(self):
         homes = {}
-        if (
-            os.uname().sysname == "Linux"
-            and type(TINYCLOUD.auth).__name__ != "AuthBuiltin"
-        ):
+        if type(TINYCLOUD.auth).__name__ == "AuthBuiltin":
+            users = TINYCLOUD.mm.require_mod("auth_builtin").auth
+            for i in users:
+                if "home" in users[i]:
+                    homes[i] = users[i]["home"]
+            return homes
+        if platform.uname().sysname == "Linux":
             with open("/etc/passwd") as passwd:
                 for i in passwd.readlines():
                     i = i.split(":")
                     homes[i[0]] = i[5]
-        if type(TINYCLOUD.auth).__name__ == "AuthBuiltin":
-                users = TINYCLOUD.mm.require_mod("auth_builtin").auth
-                for i in users:
-                    if "home" in users[i]:
-                        homes[i] = users[i]["home"]
+            return homes
+        #if platform.uname().sysname=="Windows":
+        #    for i in os.s
         return homes
 
     def get_home(self, user):
         if user in self.homes:
             return self.homes[user]
         raise FileNotFoundError
+
     def isdir(self, path):
         home = self.get_home(fs_context.username)
         path = os.path.join(home, path)
@@ -43,14 +46,16 @@ class FsSyshome:
         try:
             home = self.get_home(fs_context.username)
         except FileNotFoundError:
-            name="User {} dosn't have home".format(fs_context.username)
-            return  [{
-                        "type": "broken",
-                        "name": name,
-                        "path": path+"/"+name,
-                        "size": 0,
-                        "time": time_as_rfc(0),
-                    }]
+            name = "User {} dosn't have home".format(fs_context.username)
+            return [
+                {
+                    "type": "broken",
+                    "name": name,
+                    "path": path + "/" + name,
+                    "size": 0,
+                    "time": time_as_rfc(0),
+                }
+            ]
         real_path = home + "/" + path
         res = []
         for i in self.fs_local.list(real_path):

@@ -41,7 +41,7 @@ class Tinycloud(Flask):
         self.conf = utils.load_conf(os.path.join(confdir + "/config.yaml"))
         self.secret = self.conf["secret"]
         auth_type = self.conf["auth"]["type"]
-        self.auth:auth_common.Auth
+        self.auth: auth_common.Auth
         if auth_type is not None:
             self.mm.load_mod(auth_type)
             self.auth = self.mm.require_mod(auth_type, "auth")()
@@ -94,7 +94,6 @@ class Tinycloud(Flask):
         except FileNotFoundError:
             return "Frontend file dosn't installed"
         return data
-
 
     def login(self):
         try:
