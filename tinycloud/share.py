@@ -11,6 +11,10 @@ import dav
 TINYCLOUD = None
 
 
+class Sharefs:
+    def __init__(self,share):
+        self.share=share
+
 class Share:
     def __init__(self, fs=None, auth=None, secret=None):
         if bool(fs) | bool(auth) | bool(secret):
@@ -21,6 +25,7 @@ class Share:
             self.fs = TINYCLOUD.vfs
             self.auth = TINYCLOUD.auth
             self.secret = TINYCLOUD.secret
+            self.fs.mount(".share",Sharefs,self)
         else:
             raise TypeError()
         self.shares = {}
