@@ -7,13 +7,15 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import signal
 from app import Tinycloud
 
-DEF_CONFIG = [os.environ["HOME"]+"/.config/tinycloud", "conf", "/etc/tinycloud"]     
+DEF_CONFIG = [os.environ["HOME"] + "/.config/tinycloud", "conf", "/etc/tinycloud"]
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config")
     args = parser.parse_args()
     if args.config:
-        conf_dir = args.config.replace("~",os.environ["HOME"])
+        conf_dir = args.config.replace("~", os.environ["HOME"])
     else:
         for i in DEF_CONFIG:
             if os.path.exists(i):
@@ -33,7 +35,7 @@ def main():
     print(
         "Server is run at http://{}:{}".format(
             tc.conf["http"]["addr"], tc.conf["http"]["port"]
-            )
+        )
     )
     try:
         WSGIServer(
@@ -43,9 +45,12 @@ def main():
         tc.exit()
         sys.exit()
 
+
 def wsgi():
-    config_dir=os.environ["TC_CONFIG_PATH"].replace("~",os.environ["HOME"])
+    config_dir = os.environ["TC_CONFIG_PATH"].replace("~", os.environ["HOME"])
     return Tinycloud(config_dir)
+
+
 if __name__ == "__main__":
 
     main()

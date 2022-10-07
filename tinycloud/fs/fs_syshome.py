@@ -28,7 +28,7 @@ class FsSyshome:
                     i = i.split(":")
                     homes[i[0]] = i[5]
             return homes
-        #if platform.uname().sysname=="Windows":
+        # if platform.uname().sysname=="Windows":
         #    for i in os.s
         return homes
 
@@ -77,7 +77,11 @@ class FsSyshome:
         home = self.get_home(fs_context.username)
         filename = os.path.join(home, path)
         self.fs_local.write(filename, stream, chunk_size)
-        shutil.chown(filename, user=fs_context.username)
+        if (
+            platform.uname().sysname == "Linux"
+            and type(TINYCLOUD.auth).__name__ == "AuthBuiltin"
+        ):
+            shutil.chown(filename, user=fs_context.username)
 
     def delete(self, path):
         home = self.get_home(fs_context.username)

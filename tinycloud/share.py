@@ -2,7 +2,7 @@ import random
 import hashlib
 import os
 import json
-
+import io 
 from flask import Blueprint, request, send_file
 
 import utils
@@ -12,8 +12,58 @@ TINYCLOUD = None
 
 
 class Sharefs:
-    def __init__(self,share):
-        self.share=share
+    def __init__(self, share):
+        self.share = share
+        self.file=["add","list"]
+    def list(self, path):
+        if path == "":
+            res=[]
+            for i in self.file:
+                res.append({
+                    "type": "file",
+                    "name": i,
+                    "path": "/"+i,
+                    "size": 4,
+                    "time": utils.time_as_rfc(0),
+                })
+            return res
+        if path in self.file:
+            return [
+                {
+                    "type": "file",
+                    "name": path,
+                    "path": "/"+path,
+                    "size": 4000,
+                    "time": utils.time_as_rfc(0),
+                }
+            ]
+        raise FileNotFoundError()
+    def read(self,path):
+        if path=="add":
+            res=""
+        elif path=="list":
+            res=json.dumps(self.share.shares)
+        else:
+            raise FileNotFoundError()
+        def reader():
+            print(res)
+            yield res
+        res=io.BytesIO(bytes(res+"\n",encoding="UTF8"))
+        def reader():
+            while 1:
+                data = res.read(1)
+                if not data:
+                    break
+                yield data
+        return reader(),-1
+    def write(self,path,reader):
+        data=reader.read().decode().replace("\n","").split(" ")
+        self.share.do_make_share(data[0],utils.fs_context.username,"r")
+    def isdir(self, path):
+        if path == "":
+            return True
+        return False
+
 
 class Share:
     def __init__(self, fs=None, auth=None, secret=None):
@@ -25,7 +75,7 @@ class Share:
             self.fs = TINYCLOUD.vfs
             self.auth = TINYCLOUD.auth
             self.secret = TINYCLOUD.secret
-            self.fs.mount(".share",Sharefs,self)
+            self.fs.mount(Sharefs, ".share", {"share": self})
         else:
             raise TypeError()
         self.shares = {}

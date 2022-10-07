@@ -93,7 +93,8 @@ class Dav:
                 if path == "":
                     return ""
                 resp = Response(resp, mimetype=mimetypes.guess_type(path)[0])
-                resp.content_length = length
+                if length>=0:
+                    resp.content_length = length
                 return resp
             if request.method == "PUT":
                 ret = self.fs.write(path, request.stream)
