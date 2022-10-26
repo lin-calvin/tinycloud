@@ -51,17 +51,12 @@ class FsSyshome:
                 {
                     "type": "broken",
                     "name": name,
-                    "path": path + "/" + name,
                     "size": 0,
                     "time": time_as_rfc(0),
                 }
             ]
         real_path = home + "/" + path
-        res = []
-        for i in self.fs_local.list(real_path):
-            i["path"] = i["path"][len(home) :]
-            res.append(i)
-        return res
+        return self.fs_local.list(real_path)
 
     def prop(self, path):
         home = self.get_home(fs_context.username)

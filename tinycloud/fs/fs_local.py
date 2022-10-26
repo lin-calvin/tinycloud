@@ -27,7 +27,6 @@ class FsLocal:
                     {
                         "type": ftype,
                         "name": file,
-                        "path": os.path.join(path, file),
                         "size": fsize,
                         "time": ftime,
                     }

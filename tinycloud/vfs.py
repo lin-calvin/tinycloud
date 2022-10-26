@@ -52,10 +52,7 @@ class fs:
         if path.startswith("/"):
             path = path[1:]
         fs, p = self.get_fs(path)
-        res=[]
-        for i in fs.list(p):
-            i['path']=path.split("/")[0]+"/"+i['path']
-            res.append(i)
+        res=fs.list(p)
         return res
     def read(self, path):
         fs, path = self.get_fs(path)

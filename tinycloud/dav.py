@@ -72,6 +72,10 @@ class Dav:
                             "name": "",
                         }
                     )
+                    for i in ret:
+                        i['path']=path+"/"+i["name"]
+                else:
+                    ret[0]["path"]=path
                 return (
                     render_template(
                         "dav_respone",
