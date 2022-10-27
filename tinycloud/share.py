@@ -24,7 +24,7 @@ class Sharefs:
                     "name": i,
                     "path": "/"+i,
                     "size": 4,
-                    "time": utils.time_as_rfc(0),
+                    "time": 0,
                 })
             return res
         if path in self.file:
@@ -34,7 +34,7 @@ class Sharefs:
                     "name": path,
                     "path": "/"+path,
                     "size": 4000,
-                    "time": utils.time_as_rfc(0),
+                    "time": 0,
                 }
             ]
         raise FileNotFoundError()

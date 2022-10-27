@@ -15,7 +15,7 @@
                                 xmlns:D="DAV:"/>
                             </D:resourcetype>          
                      {% endif %}          
-                        <D:getlastmodified>{{file["time"]}}</D:getlastmodified>
+                        <D:getlastmodified>{{time_as_rfs(file["time"])}}</D:getlastmodified>
                         <D:resourcetype></D:resourcetype>
                         <D:displayname>{{ file["name"] }}</D:displayname>
                     </D:prop>

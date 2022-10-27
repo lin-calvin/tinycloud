@@ -68,7 +68,7 @@ class Dav:
                         {
                             "type": "dir",
                             "path": path,
-                            "time": utils.time_as_rfc(0),
+                            "time": 0,
                             "name": "",
                         }
                     )
@@ -84,6 +84,7 @@ class Dav:
                             "url_prefix": url_prefix_override or self.url_prefix,
                             "normpath": os.path.normpath,
                             "guess_type": mimetypes.guess_type,
+                            "time_as_rfs":utils.time_as_rfc,
                         }
                     ),
                     207,

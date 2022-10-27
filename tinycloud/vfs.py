@@ -46,7 +46,7 @@ class fs:
                     res.extend(fs.list("/"))
                 else:
                     res.append(
-                        {"type": "mountpoint", "name": a, "path": a, "size": 4000}
+                            {"type": "mountpoint","time":0, "name": a, "path": a, "size": 4000}
                     )
             return res
         if path.startswith("/"):

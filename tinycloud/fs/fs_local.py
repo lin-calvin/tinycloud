@@ -18,11 +18,11 @@ class FsLocal:
                 try:
                     ftype = ["file", "dir"][int(os.path.isdir(real_path + "/" + file))]
                     fsize = os.path.getsize(os.path.join(real_path, file))
-                    ftime = time_as_rfc(os.stat(real_path + "/" + file).st_ctime)
+                    ftime = os.stat(real_path + "/" + file).st_ctime
                 except:
                     ftype = "broken"
                     fsize = 0
-                    ftime = time_as_rfc(0)
+                    ftime = 0
                 res.append(
                     {
                         "type": ftype,
@@ -44,7 +44,7 @@ class FsLocal:
         ftype = ["file", "dir"][int(os.path.isdir(file))]
         fname = file.split("/")[-1]
         fsize = os.path.getsize(file)
-        ftime = time_as_rfc(os.stat(file).st_ctime)
+        ftime = os.stat(file).st_ctime
         res.append(
             {
                 "type": ftype,

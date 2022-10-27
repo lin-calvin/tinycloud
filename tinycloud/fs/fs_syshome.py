@@ -52,7 +52,7 @@ class FsSyshome:
                     "type": "broken",
                     "name": name,
                     "size": 0,
-                    "time": time_as_rfc(0),
+                    "time": 0,
                 }
             ]
         real_path = home + "/" + path
