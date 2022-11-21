@@ -1,21 +1,22 @@
-class FsSyshome:
+from exceptions import UnsupportedOporation
+class Fs:
     def isdir(self, path):
-        pass
+        raise UnsupportedOporation
 
     def list(self, path="/"):
-        pass
+        raise UnsupportedOporation
 
     def prop(self, path):
-        pass
+        raise UnsupportedOporation
 
     def read(self, path, chunk_size="1M"):
-        pass
+        raise UnsupportedOporation
 
     def write(self, path, stream, chunk_size="1M"):
-        pass
+        raise UnsupportedOporation
 
     def delete(self, path):
-        pass
+        raise UnsupportedOporation
 
     def mkdir(self, path):
-        pass
+        raise UnsupportedOporation

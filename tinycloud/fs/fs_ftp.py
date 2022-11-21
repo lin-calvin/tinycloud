@@ -3,7 +3,7 @@ import utils
 import io
 import os
 from dateutil import parser
-
+import exceptions
 
 class FsFtp:
     def __init__(self, host, user="", passwd="", port=21):
@@ -13,7 +13,21 @@ class FsFtp:
             self.connection.login(user, passwd)
         else:
             self.connection.login()
+    def error_handler(fn):
+        def wrapper(*args):
+            print(args)
+            try:
+                return fn(*args)
+            except Exception as e:
+                if type(e) in [ConnectionRefusedError,EOFError,BrokenPipeError]:
 
+                    raise exceptions.ResourceTemporarilyUnavailable()
+
+                if type(e)==ftplib.error_perm:
+                    raise PermissionError()
+                raise e
+        return wrapper
+    @error_handler
     def list(self, path):
         res = []
         if not self.isdir(path):
@@ -44,9 +58,24 @@ class FsFtp:
                         break
                     yield data
         return reader(),-1
+    def write(self,path,stream,chunk_size="1M"):
+        chunk_size=utils.calc_size(chunk_size)
+        self.connection.voidcmd("TYPE I")  
+        buffer=self.connection.transfercmd("STOR "+path)
+        while 1:
+            data = stream.read(chunk_size)
+            if not data:
+                buffer.close()
+                break
+            buffer.send(data)
+        self.connection.voidresp()
+    def mkcol(self,path):
+        self.connection.mkd(path)
+
     def isdir(self, path):
-        res = []
-        self.connection.mlsd(os.path.dirname(path), res.append)
+        if path=="":
+            return True
+        res = list(self.connection.mlsd("/"+os.path.dirname(path)))
         for i in res:
             if i[0]==os.path.split(path)[-1]:
                 return i[1]["type"]=="dir"
