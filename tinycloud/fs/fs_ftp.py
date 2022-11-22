@@ -46,6 +46,7 @@ class FsFtp:
             ftime = int(parser.parse(f[1]["modify"]).strftime("%s"))
             res.append({"name": fname, "path": fname, "time": ftime, "type": ftype})
         return res
+    @error_handler
     def read(self,path):
         self.connection.voidcmd("TYPE I")
         buffer=self.connection.transfercmd("RETR "+path) 
@@ -58,6 +59,7 @@ class FsFtp:
                         break
                     yield data
         return reader(),-1
+    @error_handler
     def write(self,path,stream,chunk_size="1M"):
         chunk_size=utils.calc_size(chunk_size)
         self.connection.voidcmd("TYPE I")  
@@ -69,9 +71,11 @@ class FsFtp:
                 break
             buffer.send(data)
         self.connection.voidresp()
-    def mkcol(self,path):
+    @error_handler
+    def mkdir(self,path):
         self.connection.mkd(path)
 
+    @error_handler
     def isdir(self, path):
         if path=="":
             return True

@@ -7,7 +7,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import signal
 from app import Tinycloud
 
-DEF_CONFIG = [os.environ["HOME"] + "/.config/tinycloud", "conf", "/etc/tinycloud"]
+DEF_CONFIG = ["~/.config/tinycloud", "conf", "/etc/tinycloud"]
 
 
 def main():
@@ -47,6 +47,8 @@ def main():
 
 
 def wsgi():
+    if '~' not in os.environ and '~' in os.environ["TC_CONFIG_PATH"]:
+        raise RuntimeError('$HOME hasn\'t be set')
     config_dir = os.environ["TC_CONFIG_PATH"].replace("~", os.environ["HOME"])
     return Tinycloud(config_dir)
 

@@ -1,5 +1,4 @@
 # pylint:disable=wrong-import-position
-DEF_CONFIG = ["/home/calvin/.config/tinycloud", "conf", "/etc/tinycloud"]
 import os
 import sys
 import copy
