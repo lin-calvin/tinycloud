@@ -22,7 +22,7 @@ class FsSyshome:
                 if "home" in users[i]:
                     homes[i] = users[i]["home"]
             return homes
-        if platform.uname().sysname == "Linux":
+        if platform.system() == "Linux":
             with open("/etc/passwd") as passwd:
                 for i in passwd.readlines():
                     i = i.split(":")
