@@ -8,7 +8,7 @@ import logging
 class AuthPam:
     # pylint:disable=R0903
     def __init__(self):
-        if os.uname().sysname == "Windows":
+        if os.path.sep!='/':
             raise RuntimeError("auth_pam only work on unix systems")
         if os.getuid() != 0:
             username = os.getlogin()
