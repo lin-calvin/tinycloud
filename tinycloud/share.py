@@ -2,7 +2,7 @@ import random
 import hashlib
 import os
 import json
-import io 
+import io
 from flask import Blueprint, request, send_file
 
 import utils
@@ -14,51 +14,53 @@ TINYCLOUD = None
 class Sharefs:
     def __init__(self, share):
         self.share = share
-        self.file=["add","list"]
+        self.file = ["add", "list"]
+
     def list(self, path):
         if path == "":
-            res=[]
+            res = []
             for i in self.file:
-                res.append({
-                    "type": "file",
-                    "name": i,
-                    "path": "/"+i,
-                    "size": 4,
-                    "time": 0,
-                })
+                res.append(
+                    {
+                        "type": "file",
+                        "name": i,
+                        "path": "/" + i,
+                        "size": 4,
+                        "time": 0,
+                    }
+                )
             return res
         if path in self.file:
             return [
                 {
                     "type": "file",
                     "name": path,
-                    "path": "/"+path,
+                    "path": "/" + path,
                     "size": 4000,
                     "time": 0,
                 }
             ]
         raise FileNotFoundError()
-    def read(self,path):
-        if path=="add":
-            res=""
-        elif path=="list":
-            res=json.dumps(self.share.shares)
+
+    def read(self, path):
+        if path == "add":
+            res = ""
+        elif path == "list":
+            res = json.dumps(self.share.shares)
         else:
             raise FileNotFoundError()
+
         def reader():
             print(res)
             yield res
-        res=io.BytesIO(bytes(res+"\n",encoding="UTF8"))
-        def reader():
-            while 1:
-                data = res.read(1)
-                if not data:
-                    break
-                yield data
-        return reader(),-1
-    def write(self,path,reader):
-        data=reader.read().decode().replace("\n","").split(" ")
-        self.share.do_make_share(data[0],utils.fs_context.username,"r")
+
+        res = io.BytesIO(bytes(res + "\n", encoding="UTF8"))
+        return res, -1
+
+    def write(self, path, reader):
+        data = reader.read().decode().replace("\n", "").split(" ")
+        self.share.do_make_share(data[0], utils.fs_context.username, "r")
+
     def isdir(self, path):
         if path == "":
             return True

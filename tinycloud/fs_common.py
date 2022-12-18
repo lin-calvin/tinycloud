@@ -1,4 +1,6 @@
 from exceptions import UnsupportedOporation
+
+
 class Fs:
     def isdir(self, path):
         raise UnsupportedOporation

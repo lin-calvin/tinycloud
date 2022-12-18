@@ -47,8 +47,8 @@ def main():
 
 
 def wsgi():
-    if '~' not in os.environ and '~' in os.environ["TC_CONFIG_PATH"]:
-        raise RuntimeError('$HOME hasn\'t be set')
+    if "~" not in os.environ and "~" in os.environ["TC_CONFIG_PATH"]:
+        raise RuntimeError("$HOME hasn't be set")
     config_dir = os.environ["TC_CONFIG_PATH"].replace("~", os.environ["HOME"])
     return Tinycloud(config_dir)
 

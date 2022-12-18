@@ -73,9 +73,9 @@ class Dav:
                         }
                     )
                     for i in ret:
-                        i['path']=path+"/"+i["name"]
+                        i["path"] = path + "/" + i["name"]
                 else:
-                    ret[0]["path"]=path
+                    ret[0]["path"] = path
                 return (
                     render_template(
                         "dav_respone",
@@ -84,7 +84,7 @@ class Dav:
                             "url_prefix": url_prefix_override or self.url_prefix,
                             "normpath": os.path.normpath,
                             "guess_type": mimetypes.guess_type,
-                            "time_as_rfs":utils.time_as_rfc,
+                            "time_as_rfs": utils.time_as_rfc,
                         }
                     ),
                     207,
@@ -94,11 +94,21 @@ class Dav:
                 resp.headers["DAV"] = "1,2"
                 return resp
             if request.method == "GET":
-                resp, length = self.fs.read(path)
+                file, length = self.fs.read(path)
                 if path == "":
                     return ""
-                resp = Response(resp, mimetype=mimetypes.guess_type(path)[0])
-                if length>=0:
+
+                def reader():
+                    while 1:
+                        data = file.read(utils.calc_size("1M"))
+                        if not data:
+                            if hasattr(file, "close"):
+                                file.close()
+                            break
+                        yield data
+
+                resp = Response(reader(), mimetype=mimetypes.guess_type(path)[0])
+                if length >= 0:
                     resp.content_length = length
                 return resp
             if request.method == "PUT":

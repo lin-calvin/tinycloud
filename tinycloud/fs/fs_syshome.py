@@ -22,7 +22,7 @@ class FsSyshome:
                 if "home" in users[i]:
                     homes[i] = users[i]["home"]
             return homes
-        if platform.system() == "Linux":
+        if os.uname().sysname == "Linux":
             with open("/etc/passwd") as passwd:
                 for i in passwd.readlines():
                     i = i.split(":")
@@ -66,14 +66,14 @@ class FsSyshome:
     def read(self, path, chunk_size="1M"):
         home = self.get_home(fs_context.username)
         real_path = os.path.join(home, path)
-        return self.fs_local.read(real_path, chunk_size)
+        return self.fs_local.read(real_path)
 
     def write(self, path, stream, chunk_size="1M"):
         home = self.get_home(fs_context.username)
         filename = os.path.join(home, path)
         self.fs_local.write(filename, stream, chunk_size)
         if (
-            platform.uname().sysname == "Linux"
+            platform.uname().system == "Linux"
             and type(TINYCLOUD.auth).__name__ == "AuthBuiltin"
         ):
             shutil.chown(filename, user=fs_context.username)

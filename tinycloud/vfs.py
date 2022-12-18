@@ -46,14 +46,21 @@ class fs:
                     res.extend(fs.list("/"))
                 else:
                     res.append(
-                            {"type": "mountpoint","time":0, "name": a, "path": a, "size": 4000}
+                        {
+                            "type": "mountpoint",
+                            "time": 0,
+                            "name": a,
+                            "path": a,
+                            "size": 4000,
+                        }
                     )
             return res
         if path.startswith("/"):
             path = path[1:]
         fs, p = self.get_fs(path)
-        res=fs.list(p)
+        res = fs.list(p)
         return res
+
     def read(self, path):
         fs, path = self.get_fs(path)
         return fs.read(path)
