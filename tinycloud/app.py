@@ -8,7 +8,7 @@ import json
 import signal
 import argparse
 import faulthandler
-from flask import Flask, request
+from quart import Quart, request
 
 
 import dav
@@ -27,7 +27,7 @@ faulthandler.enable()
 # logging.basicConfig(filename='/dev/stdout', level=logging.INFO)
 
 
-class Tinycloud(Flask):
+class Tinycloud(Quart):
     """
     Main class of Tinycloud
     """
@@ -86,7 +86,7 @@ class Tinycloud(Flask):
         api = self.mm.require_mod(mod, "api")()
         self.register_blueprint(api)
 
-    def main_page(self):
+    async def main_page(self):
         try:
             with open(os.path.dirname(__file__) + "/static/index.html") as file:
                 data = file.read()
@@ -94,9 +94,9 @@ class Tinycloud(Flask):
             return "Frontend file dosn't installed"
         return data
 
-    def login(self):
+    async def login(self):
         try:
-            username, password = utils.get_passwd()
+            username, password = utils.get_passwd(request)
         except ValueError:
             return {"status": 403}, 403
         res = self.auth.do_auth(username, password)
@@ -105,8 +105,8 @@ class Tinycloud(Flask):
         token = utils.generate_jwt({"username": username}, self.conf["secret"])
         return {"status": 200, "token": token}
 
-    def check_login(self):
-        token = json.loads(request.data.decode())["token"]
+    async def check_login(self):
+        token = json.loads((await request.data).decode())["token"]
         if utils.chk_jwt(token, self.secret):
             return {"status": 200}, 200
         return {"status": 403}, 403

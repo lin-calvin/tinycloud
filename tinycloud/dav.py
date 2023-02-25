@@ -6,7 +6,7 @@ import mimetypes
 import os
 import traceback
 
-from flask import render_template, request, make_response, Response, Blueprint
+from quart import render_template, request, make_response, Response, Blueprint
 
 import utils
 
@@ -20,12 +20,12 @@ class Dav:
         self, fs, acl=None, auth=None, blueprint=True, secret=None, url_prefix="/dav"
     ):
         if blueprint:
-            self.api = Blueprint("dav", __name__, url_prefix=url_prefix)
+            self.api = Blueprint("dav", "dav", url_prefix=url_prefix)
             for route in ["", "/", "/<path:path>"]:
                 self.api.add_url_rule(
                     route,
                     methods=["GET", "PUT", "PROPFIND", "DELETE", "MKCOL", "OPTIONS"],
-                    view_func=self,
+                    view_func=self.__call__,
                 )
         self.url_prefix = url_prefix
         self.auth = auth
@@ -34,20 +34,20 @@ class Dav:
         self.secret = secret
         self.__name__ = ""
 
-    def __call__(self, path="", url_prefix_override=None):
+    async def __call__(self, path="", url_prefix_override=None):
         path = os.path.normpath("/" + path)
         if ".." in path:
             return "", 400
         if self.auth:
             try:
-                res = utils.chk_auth(self.auth, secret=self.secret)
+                res = utils.chk_auth(request,self.auth, secret=self.secret)
                 if not res:
                     return Response(
                         "", 401, {"WWW-Authenticate": 'Basic realm="Tinycloud"'}
                     )
             except KeyError:
                 return "", 403
-            utils.fs_context.username = utils.get_passwd()[0]
+            utils.fs_context.username = utils.get_passwd(request)[0]
         else:
             if not utils.fs_context.username:
                 utils.fs_context.username = None
@@ -57,13 +57,13 @@ class Dav:
                 return "", 403
         try:
             if request.method == "PROPFIND":  # 返回目录下的文件
-                ret = self.fs.list(path)
+                ret = await self.fs.list(path)
                 if type(ret) == int:
                     if ret == -1:
                         return "", 404
                 if request.args.get("json_mode"):
                     return {"files": ret}
-                if self.fs.isdir(path):
+                if await self.fs.isdir(path):
                     ret.append(
                         {
                             "type": "dir",
@@ -77,7 +77,7 @@ class Dav:
                 else:
                     ret[0]["path"] = path
                 return (
-                    render_template(
+                    await render_template(
                         "dav_respone",
                         **{
                             "files": ret,
@@ -89,21 +89,21 @@ class Dav:
                     ),
                     207,
                 )
-            if request.method == "OPTIONS":  # 确定webdav支持
+            if request.method == "OPTIONS":
                 resp = make_response()
                 resp.headers["DAV"] = "1,2"
                 return resp
             if request.method == "GET":
-                file, length = self.fs.read(path)
+                file, length = await self.fs.read(path)
                 if path == "":
                     return ""
 
-                def reader():
+                async def reader():
                     while 1:
-                        data = file.read(utils.calc_size("1M"))
+                        data = await file.read(utils.calc_size("1M"))
                         if not data:
                             if hasattr(file, "close"):
-                                file.close()
+                                await file.close()
                             break
                         yield data
 
@@ -112,7 +112,7 @@ class Dav:
                     resp.content_length = length
                 return resp
             if request.method == "PUT":
-                ret = self.fs.write(path, request.stream)
+                ret = await self.fs.write(path, request.stream)
                 return ""
             if request.method == "DELETE":
                 self.fs.delete(path)

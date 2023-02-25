@@ -28,13 +28,13 @@ class fs:
             return self.mount_table["<root>"], "/".join(p)
         raise FileNotFoundError
 
-    def isdir(self, path):
+    async def isdir(self, path):
         if path == "/":
             return True
         fs, path = self.get_fs(path)
         return fs.isdir(path)
 
-    def list(self, path):
+    async def list(self, path):
         if path == "/" or path == "":
             res = []
             for a in self.mount_table:
@@ -43,7 +43,7 @@ class fs:
                         fs, _ = self.get_fs("<root>")
                     except FileNotFoundError:
                         continue
-                    res.extend(fs.list("/"))
+                    res.extend(await fs.list("/"))
                 else:
                     res.append(
                         {
@@ -58,21 +58,21 @@ class fs:
         if path.startswith("/"):
             path = path[1:]
         fs, p = self.get_fs(path)
-        res = fs.list(p)
+        res = await fs.list(p)
         return res
 
-    def read(self, path):
+    async def read(self, path):
         fs, path = self.get_fs(path)
-        return fs.read(path)
+        return await fs.read(path)
 
-    def mkdir(self, path):
+    async def mkdir(self, path):
         fs, path = self.get_fs(path)
-        return fs.mkdir(path)
+        return await fs.mkdir(path)
 
-    def write(self, path, data):
+    async def write(self, path, data):
         fs, path = self.get_fs(path)
-        return fs.write(path, data)
+        return await fs.write(path, data)
 
-    def delete(self, path):
+    async def delete(self, path):
         fs, path = self.get_fs(path)
-        return fs.delete(path)
+        return await fs.delete(path)

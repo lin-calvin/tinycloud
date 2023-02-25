@@ -2,7 +2,6 @@ import email.utils
 import datetime
 import math
 import json
-from flask import request
 import base64
 import yaml
 import hmac
@@ -51,7 +50,7 @@ def time_as_rfc(timestamp: int):
     return email.utils.format_datetime(datetime.datetime.fromtimestamp(timestamp))
 
 
-def chk_auth(auth, secret=None):
+def chk_auth(request,auth, secret=None):
     """
     Check if the credentials provides by clients is valid
     """
@@ -72,7 +71,7 @@ def chk_auth(auth, secret=None):
     return res
 
 
-def get_passwd():
+def get_passwd(request):
     """
     Get username and passwd from client
     """

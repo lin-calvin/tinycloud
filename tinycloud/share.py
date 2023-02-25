@@ -3,7 +3,7 @@ import hashlib
 import os
 import json
 import io
-from flask import Blueprint, request, send_file
+from quart import Blueprint, request, send_file
 
 import utils
 import dav
@@ -124,20 +124,20 @@ class Share:
     def do_del_share(self, idt):
         del self.shares[idt]
 
-    def del_share_view(self):
-        if not utils.chk_auth(self.auth, TINYCLOUD.secret):
+    async def del_share_view(self):
+        if not utils.chk_auth(request,self.auth, TINYCLOUD.secret):
             return {"error": 403}, 403
-        id = json.loads(request.data.decode())["id"]
+        id = json.loads((await request.data()).decode())["id"]
         try:
             self.do_del_share(id)
             return {"res": "ok"}, 200
         except KeyError:
             return {"res": "err", "error": 404}, 404
 
-    def make_share_view(self):
+    async def make_share_view(self):
         if not utils.chk_auth(self.auth, self.secret):
             return {"error": 403}, 403
-        req = json.loads(request.data.decode())
+        req = json.loads((await request.data()).decode())
         path = req["path"]
         args = {"path": path, "username": utils.get_passwd()[0]}
 
@@ -162,20 +162,20 @@ class Share:
             return "", 403
         return self.dav(path, url_prefix_override="/api/shares/dav/" + p[0])
 
-    def share_info(self, idt):
+    async def share_info(self, idt):
         return self.shares[idt]
 
-    def view_share(self, path):
+    async def view_share(self, path):
         if path.split("/")[0] in self.shares:
-            return send_file("static/share.html")
+            return await send_file("static/share.html")
         return "Not such share", 404
 
     def on_exit(self):
         with open(TINYCLOUD.confdir + "/shares.json", "w") as dump:
             json.dump(self.shares, dump)
 
-    def all_shares(self):
-        if not utils.chk_auth(self.auth, self.secret):
+    async def all_shares(self):
+        if not utils.chk_auth(request,self.auth, self.secret):
             return {"err": 403}, 403
         return self.shares
 

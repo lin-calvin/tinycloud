@@ -1,7 +1,6 @@
 import argparse
 import os
 import sys
-from gevent.pywsgi import WSGIServer
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import signal
@@ -38,9 +37,7 @@ def main():
         )
     )
     try:
-        WSGIServer(
-            (tc.conf["http"]["addr"], tc.conf["http"]["port"]), tc
-        ).serve_forever()
+        tc.run()    
     except KeyboardInterrupt:
         tc.exit()
         sys.exit()

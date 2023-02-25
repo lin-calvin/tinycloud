@@ -1,16 +1,17 @@
 import os
 import time
 from utils import time_as_rfc, calc_size
-
+from aiofile import async_open
+import asyncio
 
 class FsLocal:
     def __init__(self, path):
         self.path = path
 
-    def isdir(self, path):
+    async def isdir(self, path):
         return os.path.isdir(os.path.join(self.path, path))
 
-    def list(self, path="/"):
+    async def list(self, path="/"):
         res = []
         real_path = os.path.normpath(self.path + "/" + path)
         if os.path.isdir(real_path):
@@ -38,7 +39,7 @@ class FsLocal:
             res = self.prop(path)
         return res
 
-    def prop(self, path):
+    async def prop(self, path):
         res = []
         file = self.path + "/" + path
         ftype = ["file", "dir"][int(os.path.isdir(file))]
@@ -56,20 +57,21 @@ class FsLocal:
         )
         return res
 
-    def read(self, path):
+    async def read(self, path):
         filesize = os.path.getsize(os.path.join(self.path, path))
-        file = open(os.path.join(self.path, path), "rb")
+        file = async_open(os.path.join(self.path, path), "rb")
+        await file.file
         return file, filesize
 
-    def write(self, path, stream):
-        file = open(os.path.join(self.path, path), "wb")
+    async def write(self, path, stream):
+        file = async_open(os.path.join(self.path, path), "wb")
         chunk_size = calc_size("1M")
         while 1:
-            data = stream.read(chunk_size)
+            data = await stream.read(chunk_size)
             if not data:
-                file.close()
+                await file.close()
                 break
-            file.write(data)
+            await file.write(data)
 
     def delete(self, path):
         os.remove(os.path.join(self.path, path))
@@ -79,3 +81,4 @@ class FsLocal:
 
 
 PROVIDE = {"fs": FsLocal}
+asyncio.Future
